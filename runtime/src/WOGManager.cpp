@@ -13,7 +13,7 @@ using jsoncons::json;
 #define DEBUG_PRINT
 
 WOGManager::WOGManager(octree *tree, std::string const& path, int port, int window_width, int window_height, real fovy,
-  real farZ, real camera_distance, real deletion_radius_factor)
+  real farZ, real camera_distance, real deletion_radius_factor, int reduce_bodies_factor)
  : tree(tree),
    server_socket(-1),
    client_socket(-1),
@@ -26,7 +26,8 @@ WOGManager::WOGManager(octree *tree, std::string const& path, int port, int wind
    simulation_plane_width(0.0),
    simulation_plane_height(0.0),
    deletion_radius_factor(deletion_radius_factor),
-   deletion_radius_square(0.0)
+   deletion_radius_square(0.0),
+   reduce_bodies_factor(reduce_bodies_factor)
 {
   read_galaxies(path);
   reshape(window_width, window_height);
@@ -87,22 +88,23 @@ void WOGManager::read_galaxies(std::string const& path)
   	int NSecond = 0;
   	int NThird = 0;
 
-  	read_tipsy_file_parallel(galaxy.pos, galaxy.vel, galaxy.ids,
+  	read_tipsy_file_parallel(galaxy.pos, galaxy.vel, galaxy.ids, galaxy.rgba,
   	  0.0, filename.c_str(), 0, 1, Total2, NFirst, NSecond, NThird, nullptr,
-  	  galaxy.pos_dust, galaxy.vel_dust, galaxy.ids_dust, 1, 1, false);
+  	  galaxy.pos_dust, galaxy.vel_dust, galaxy.ids_dust, reduce_bodies_factor, 1, false);
 
   	real4 cm = galaxy.getCenterOfMass();
-  	std::cout << "Center of mass = " << cm.x << " " << cm.y << " " << cm.z << std::endl;
+  	std::cout << "  Center of mass = " << cm.x << " " << cm.y << " " << cm.z << std::endl;
   	real4 tv = galaxy.getTotalVelocity();
-  	std::cout << "Total_velocity = " << tv.x << " " << tv.y << " " << tv.z << std::endl;
+  	std::cout << "  Total_velocity = " << tv.x << " " << tv.y << " " << tv.z << std::endl;
 
+        std::cout << "  centering() and steady()" << std::endl;
   	galaxy.centering();
   	galaxy.steady();
 
   	cm = galaxy.getCenterOfMass();
-  	std::cout << "Center of mass = " << cm.x << " " << cm.y << " " << cm.z << std::endl;
+  	std::cout << "  Center of mass = " << cm.x << " " << cm.y << " " << cm.z << std::endl;
   	tv = galaxy.getTotalVelocity();
-  	std::cout << "Total_velocity = " << tv.x << " " << tv.y << " " << tv.z << std::endl;
+  	std::cout << "  Total_velocity = " << tv.x << " " << tv.y << " " << tv.z << std::endl;
 
   	galaxies.push_back(galaxy);
   }

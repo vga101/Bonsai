@@ -40,7 +40,7 @@ class WOGManager
 
   /// Constructor opening sockets and reading input galaxies
   WOGManager(octree *tree, std::string const& path, int port, int window_width, int window_height, real fovy,
-	real farZ, real camera_distance, real deletion_radius_factor);
+	real farZ, real camera_distance, real deletion_radius_factor, int reduce_bodies_factor);
 
   /// Constructor closing the sockets
   ~WOGManager();
@@ -102,6 +102,9 @@ class WOGManager
 
   /// Squared radius of deletion sphere. Particles leaving this sphere will be removed.
   real deletion_radius_square;
+
+  /// Reduction factor for particles
+  int reduce_bodies_factor;
 
   /// Galaxy types which can be released
   std::vector<Galaxy> galaxies;

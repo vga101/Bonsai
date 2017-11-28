@@ -586,6 +586,7 @@ int main(int argc, char** argv)
   vector<real4> bodyPositions;
   vector<real4> bodyVelocities;
   vector<int>   bodyIDs;
+  vector<real4> bodyRgba;
 
   vector<real4> dustPositions;
   vector<real4> dustVelocities;
@@ -810,8 +811,8 @@ int main(int argc, char** argv)
     /// WarOfGalaxies: Deactivate unneeded flags if WarOfGalaxies path will be used
     if (!wogPath.empty()) {
       throw_if_flag_is_used(opt, {{"direct", "restart", "displayfps", "diskmode", "stereo", "prepend-rank"}});
-      throw_if_option_is_used(opt, {{"plummer", "milkyway", "mwfork", "sphere", "dt", "tend", "iend",
-        "snapname", "snapiter", "rmdist", "valueadd", "rebuild", "reducebodies", "reducedust", "gameMode"}});
+      throw_if_option_is_used(opt, {{"plummer", "milkyway", "mwfork", "sphere", "tend", "iend",
+        "snapname", "snapiter", "rmdist", "valueadd", "rebuild", "reducedust", "gameMode"}});
     }
 
 #undef ADDUSAGE
@@ -1004,7 +1005,7 @@ int main(int argc, char** argv)
   {
     //The input snapshot file are many files with each process reading its own
     //particles
-    read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, eps, fileName,
+    read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, bodyRgba, eps, fileName,
         procId, nProcs, NTotal, NFirst, NSecond, NThird, tree,
         dustPositions, dustVelocities, dustIDs, reduce_bodies_factor, reduce_dust_factor, true);
 
@@ -1014,7 +1015,7 @@ int main(int argc, char** argv)
     if(procId == 0)
     {
 #ifdef TIPSYOUTPUT
-      read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, eps, fileName, 
+      read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, bodyRgba, eps, fileName, 
           procId, nProcs, NTotal, NFirst, NSecond, NThird, tree,
           dustPositions, dustVelocities, dustIDs, reduce_bodies_factor, reduce_dust_factor, false);
 
@@ -1369,7 +1370,7 @@ int main(int argc, char** argv)
 #ifdef USE_OPENGL
   octree::IterationData idata;
   initAppRenderer(argc, argv, tree, idata, displayFPS, stereo,
-	wogPath, wogPort, wogCameraDistance, wogDeletionRadiusFactor);
+	wogPath, wogPort, wogCameraDistance, wogDeletionRadiusFactor, reduce_bodies_factor);
   LOG("Finished!!! Took in total: %lg sec\n", tree->get_time()-t0);
 #else
   tree->mpiSync();

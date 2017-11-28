@@ -7,6 +7,7 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 add_executable(create_tipsy create_tipsy.cpp)
+add_executable(ascii_to_tipsy ascii_to_tipsy.cpp)
 add_executable(read_tipsy read_tipsy.cpp)
 add_executable(split_tipsy split_tipsy.cpp)
 add_executable(reduce_tipsy reduce_tipsy.cpp)

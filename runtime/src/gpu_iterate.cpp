@@ -216,7 +216,7 @@ void octree::makeLET()
 }
 
 extern void read_tipsy_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyVelocities,
-                              vector<int> &bodiesIDs,  float eps2, string fileName, 
+                              vector<int> &bodiesIDs,  vector<real4> &bodyRgba, float eps2, string fileName, 
                               int rank, int procs, int &NTotal2, int &NFirst, 
                               int &NSecond, int &NThird, octree *tree,
                               vector<real4> &dustPositions, vector<real4> &dustVelocities,
@@ -242,6 +242,7 @@ bool octree::addGalaxy(int galaxyID)
     vector<real4> newGalaxy_pos;
     vector<real4> newGalaxy_vel;
     vector<int> newGalaxy_ids;
+    vector<real4> newGalaxy_rgba;
     vector<real4> currentGalaxy_pos;
     vector<real4> currentGalaxy_vel;
     vector<int>   currentGalaxy_ids;    
@@ -265,7 +266,7 @@ bool octree::addGalaxy(int galaxyID)
     int procs = 1;
     int NTotal, NFirst, NSecond, Nthird = 0;
     int reduce_bodies = 50;
-    read_tipsy_file_parallel(newGalaxy_pos, newGalaxy_vel, newGalaxy_ids, 0, fileName, 
+    read_tipsy_file_parallel(newGalaxy_pos, newGalaxy_vel, newGalaxy_ids, newGalaxy_rgba, 0, fileName, 
                              rank, procs, NTotal, NFirst, NSecond, NThird, this,
                              newGalaxy_pos_dust, newGalaxy_vel_dust, newGalaxy_ids_dust,
                              reduce_bodies, 1, false);

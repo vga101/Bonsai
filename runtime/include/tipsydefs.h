@@ -37,6 +37,7 @@ struct star_particle {
     Real tform ;
     Real eps;
     int phi ;
+    float rgba[4];
 } ;
 
 //struct star_particle *star_particles;

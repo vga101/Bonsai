@@ -301,13 +301,14 @@ void glPrintf(float x, float y, const char* format, ...)
 }
 
 // reducing to improve perf
-#define MAX_PARTICLES 700000
+#define MAX_PARTICLES 1000000
 
 class BonsaiDemo
 {
 public:
   BonsaiDemo(octree *tree, octree::IterationData &idata,
-    std::string const& wogPath, int wogPort, real wogCameraDistance, real wogDeletionRadiusFactor)
+    std::string const& wogPath, int wogPort, real wogCameraDistance, real wogDeletionRadiusFactor,
+    int reduce_bodies_factor)
     : m_tree(tree), m_idata(idata), iterationsRemaining(true),
       //m_renderer(tree->localTree.n + tree->localTree.n_dust),
       m_renderer(tree->localTree.n + tree->localTree.n_dust, MAX_PARTICLES),
@@ -348,7 +349,8 @@ public:
 #else
       m_enableStats(true),
 #endif
-      m_wogManager(tree, wogPath, wogPort, 1024, 768, m_fov, m_farZ, wogCameraDistance, wogDeletionRadiusFactor)
+      m_wogManager(tree, wogPath, wogPort, 1024, 768, m_fov, m_farZ, wogCameraDistance, wogDeletionRadiusFactor,
+                   reduce_bodies_factor)
   {
     m_windowDims = make_int2(1024, 768);
     m_cameraTrans = make_float3(0, -2, -100);
@@ -592,7 +594,6 @@ public:
         m_renderer.setNumberOfParticles(m_tree->localTree.n + m_tree->localTree.n_dust);
         fitCamera(); //Try to get the model back in view
       }
-      
       getBodyData();
       getBodyDataTime = GetTimer();
 
@@ -1115,7 +1116,7 @@ public:
     float distanceToCenter = radius / sinf(0.5f * fovRads);
     
     //m_cameraTrans = center + make_float3(0, 0, -distanceToCenter*0.2f);
-    m_cameraTrans = make_float3(0, 0, -500);
+    m_cameraTrans = make_float3(0, 0, -100);
     printf("camera trans %f %f %f \n",m_cameraTrans.x, m_cameraTrans.y, m_cameraTrans.z);
 
 #if 0
@@ -1281,7 +1282,6 @@ public:
 		}
 
 		LOGF(stderr, "sunIdx= %d  m31Idx= %d \n", sunIdx, m31Idx);
-
 		m_renderer.setColors((float*)colors);
 #else  /* eg: assign colours on the device */
 		const float Tcurrent = m_tree->get_t_current() * 9.78f;
@@ -1387,7 +1387,7 @@ public:
     //dustColor = make_float4(0.0f, 0.2f, 0.1f, 0.0f);  // green
     //dustColor = make_float4(0.0f, 0.0f, 0.0f, 0.0f);  // black
 
-    darkMatterColor = make_float4(0.0f, 0.2f, 0.4f, 3.0f);      // blue
+    darkMatterColor = make_float4(1.0f, 1.0f, 0.0f, 5.0f);      // blue
 
     m_colorParams = new ParamListGL("colors");
 #if 0
@@ -1912,11 +1912,13 @@ void initGL(int argc, char** argv, const char *gameMode, bool &stereo, bool full
 
 void initAppRenderer(int argc, char** argv, octree *tree, octree::IterationData &idata,
 		             bool showFPS, bool stereo, std::string const& wogPath, int wogPort,
-		             real wogCameraDistance, real wogDeletionRadiusFactor)
+		             real wogCameraDistance, real wogDeletionRadiusFactor,
+                             int reduce_bodies_factor)
 {
   displayFps = showFPS;
   //initGL(argc, argv);
-  theDemo = new BonsaiDemo(tree, idata, wogPath, wogPort, wogCameraDistance, wogDeletionRadiusFactor);
+  theDemo = new BonsaiDemo(tree, idata, wogPath, wogPort, wogCameraDistance, wogDeletionRadiusFactor,
+                           reduce_bodies_factor);
   if (stereo)
     theDemo->toggleStereo(); //SV assuming stereo is set to disable by default.
   glutMainLoop();

@@ -11,6 +11,7 @@ void initGL(int argc, char** argv, const char *gameModeString, bool &stereo, boo
 void initAppRenderer(int argc, char** argv, octree *tree, 
                      octree::IterationData &idata, bool showFPS, bool stereo,
                      std::string const& wogPath, int wogPort,
-                     real wogCameraDistance, real wogDeletionRadiusFactor);
+                     real wogCameraDistance, real wogDeletionRadiusFactor,
+                     int reduce_bodies_factor);
 
 #endif // _RENDERLOOP_H_
