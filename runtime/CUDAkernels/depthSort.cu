@@ -258,70 +258,87 @@ KERNEL_DECLARE(assignColorsKernel) (float4 *colors, int *ids, int numParticles,
 
 	float4 color;
 
-	if (id >= 0 && id < 40000000)     //Disk
-	{
-		color = ((id % m_brightFreq) != 0) ? 
-			starColor :
-			((id / m_brightFreq) & 1) ? color2 : color3;
+// 	if (id >= 0 && id < 40000000)     //Disk
+// 	{
+// 		color = ((id % m_brightFreq) != 0) ? 
+// 			starColor :
+// 			((id / m_brightFreq) & 1) ? color2 : color3;
+// 
+// 		const float  Mstar = sDisk.sampleMass(id);
+// 		const float4 Cstar = sDisk.getColour(Mstar);
+// #if 0
+// 		const float fdim = 1.0;
+// 		color = ((id & 1023) == 0) ?   /* one in 1000 stars glows a bit */
+// 			              make_float4(Cstar.x*fdim,  Cstar.y*fdim,  Cstar.z*fdim,  Cstar.w) : 
+// 			(0) ? color : make_float4(Cstar.x*0.01f, Cstar.y*0.01f, Cstar.z*0.01f, Cstar.w);
+// #else
+// 		color = ((id & 1023) == 0) ?   /* one in 1000 stars glows a bit */
+// 			              sGlow.getColour(sGlow.sampleMass(id)) :
+// 			(0) ? color : make_float4(Cstar.x*0.01f, Cstar.y*0.01f, Cstar.z*0.01f, Cstar.w);
+// #endif
+// 	} else if (id >= 40000000 && id < 50000000)     // Glowing stars in spiral arms
+// 	{
+// 		color = ((id%4) == 0) ? color4 : color3;
+// #if 1
+// 		/* sample colours form the MF */
+// 		const float  Mstar = sGlow.sampleMass(id);
+// 		const float4 Cstar = sGlow.getColour(Mstar);
+// 		color = Cstar;
+// 
+// 		//We need to tune this parameter, this disabled glowing stars uptill a certain time
+// 		color.x *= t_current.z;
+// 		color.y *= t_current.z;
+// 		color.z *= t_current.z;
+// 		color.w  = t_current.w;
+// #if 0
+// 		if(t_current.x < t_current.y)    
+// 			color.w = 3.0f;
+// #endif
+// #endif
+// 	}
+// 	else if (id >= 50000000 && id < 70000000) //Dust
+// 	{
+// 		color = dustColor * make_float4(r, r, r, 1.0f);
+// 	} 
+// 	else if (id >= 70000000 && id < 100000000) // Glow massless dust particles
+// 	{
+// 		color = color3;  /*  adds glow in purple */
+// 	}
+// 	else if (id >= 100000000 && id < 200000000) //Bulge
+// 	{
+// 		//colors[i] = starColor;
+// 		color = bulgeColor;
+// #if 1
+// 		const float  Mstar = sBulge.sampleMass(id);
+// 		const float4 Cstar = sBulge.getColour(Mstar);
+// 		const float fdim = 0.01f;
+// 		color = Cstar * make_float4(fdim, fdim, fdim, 2.0f);
+// #endif
+// 	} 
+// 	else //>= 200000000, Dark matter
+// 	{
+// 		color = darkMatterColor;
+// 		//colors[i] = darkMatterColor * make_float4(r, r, r, 1.0f);
+// 	}            		
 
-		const float  Mstar = sDisk.sampleMass(id);
-		const float4 Cstar = sDisk.getColour(Mstar);
-#if 0
-		const float fdim = 1.0;
-		color = ((id & 1023) == 0) ?   /* one in 1000 stars glows a bit */
-			              make_float4(Cstar.x*fdim,  Cstar.y*fdim,  Cstar.z*fdim,  Cstar.w) : 
-			(0) ? color : make_float4(Cstar.x*0.01f, Cstar.y*0.01f, Cstar.z*0.01f, Cstar.w);
-#else
-		color = ((id & 1023) == 0) ?   /* one in 1000 stars glows a bit */
-			              sGlow.getColour(sGlow.sampleMass(id)) :
-			(0) ? color : make_float4(Cstar.x*0.01f, Cstar.y*0.01f, Cstar.z*0.01f, Cstar.w);
-#endif
-	} else if (id >= 40000000 && id < 50000000)     // Glowing stars in spiral arms
-	{
-		color = ((id%4) == 0) ? color4 : color3;
-#if 1
-		/* sample colours form the MF */
-		const float  Mstar = sGlow.sampleMass(id);
-		const float4 Cstar = sGlow.getColour(Mstar);
-		color = Cstar;
 
-		//We need to tune this parameter, this disabled glowing stars uptill a certain time
-		color.x *= t_current.z;
-		color.y *= t_current.z;
-		color.z *= t_current.z;
-		color.w  = t_current.w;
-#if 0
-		if(t_current.x < t_current.y)    
-			color.w = 3.0f;
-#endif
-#endif
+	
+	//star start from 		100 000 000
+	//dark matter starts from 	200 000 000
+	if(id > 100000000 && id < 200000000){
+	      color = make_float4(1.0f, 0.0f, 0.0f, 1.0f);   
+// 	      color = color3;
 	}
-	else if (id >= 50000000 && id < 70000000) //Dust
-	{
-		color = dustColor * make_float4(r, r, r, 1.0f);
-	} 
-	else if (id >= 70000000 && id < 100000000) // Glow massless dust particles
-	{
-		color = color3;  /*  adds glow in purple */
+	else if(id >= 200000000){
+	      color = make_float4(0.0f, 1.0f, 0.0f, 1.0f);
 	}
-	else if (id >= 100000000 && id < 200000000) //Bulge
-	{
-		//colors[i] = starColor;
-		color = bulgeColor;
-#if 1
-		const float  Mstar = sBulge.sampleMass(id);
-		const float4 Cstar = sBulge.getColour(Mstar);
-		const float fdim = 0.01f;
-		color = Cstar * make_float4(fdim, fdim, fdim, 2.0f);
-#endif
-	} 
-	else //>= 200000000, Dark matter
-	{
-		color = darkMatterColor;
-		//colors[i] = darkMatterColor * make_float4(r, r, r, 1.0f);
-	}            
+	else{
+	      color = make_float4(1.0f, 1.0f, 1.0f, 1.0f);
+	}
+	color = make_float4(1.0f, 1.0f, 1.0f, 0.0f);
 
-
+// 	float4 
+// 	color = make_float4(1.0f, 0.0f, 0.0f, 1.0f);	
 	colors[tid] = color;
 }
 #endif

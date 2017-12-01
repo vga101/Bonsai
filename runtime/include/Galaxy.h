@@ -34,9 +34,9 @@ struct Galaxy
 
   std::vector<real4> pos;
   std::vector<real4> vel;
+  std::vector<real4> col;   
   std::vector<int> ids;
-  std::vector<real4> rgba;
-
+ 
   std::vector<real4> pos_dust;
   std::vector<real4> vel_dust;
   std::vector<int> ids_dust;

@@ -12,9 +12,8 @@
 #include <octree.h>
 #include <vector>
 
-void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<real4> &bodyVelocities,
-                              std::vector<int> &bodiesIDs,  std::vector<real4> &bodyRgba,
-                              float eps2, string fileName,
+void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<real4> &bodyVelocities, std::vector<real4> &bodyColors, 
+                              std::vector<int> &bodiesIDs, float eps2, string fileName,
                               int rank, int procs, int &NTotal2, int &NFirst,
                               int &NSecond, int &NThird, octree *tree,
                               std::vector<real4> &dustPositions, std::vector<real4> &dustVelocities,

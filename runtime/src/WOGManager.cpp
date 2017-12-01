@@ -88,7 +88,7 @@ void WOGManager::read_galaxies(std::string const& path)
   	int NSecond = 0;
   	int NThird = 0;
 
-  	read_tipsy_file_parallel(galaxy.pos, galaxy.vel, galaxy.ids, galaxy.rgba,
+  	read_tipsy_file_parallel(galaxy.pos, galaxy.vel, galaxy.col, galaxy.ids,
   	  0.0, filename.c_str(), 0, 1, Total2, NFirst, NSecond, NThird, nullptr,
   	  galaxy.pos_dust, galaxy.vel_dust, galaxy.ids_dust, reduce_bodies_factor, 1, false);
 

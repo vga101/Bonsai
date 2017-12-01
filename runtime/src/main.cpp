@@ -585,8 +585,9 @@ int main(int argc, char** argv)
 
   vector<real4> bodyPositions;
   vector<real4> bodyVelocities;
+  vector<real4> bodyColors;  
   vector<int>   bodyIDs;
-  vector<real4> bodyRgba;
+  //vector<real4> bodyRgba;
 
   vector<real4> dustPositions;
   vector<real4> dustVelocities;
@@ -1005,7 +1006,7 @@ int main(int argc, char** argv)
   {
     //The input snapshot file are many files with each process reading its own
     //particles
-    read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, bodyRgba, eps, fileName,
+    read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyColors, bodyIDs, eps, fileName,
         procId, nProcs, NTotal, NFirst, NSecond, NThird, tree,
         dustPositions, dustVelocities, dustIDs, reduce_bodies_factor, reduce_dust_factor, true);
 
@@ -1015,7 +1016,7 @@ int main(int argc, char** argv)
     if(procId == 0)
     {
 #ifdef TIPSYOUTPUT
-      read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyIDs, bodyRgba, eps, fileName, 
+      read_tipsy_file_parallel(bodyPositions, bodyVelocities, bodyColors, bodyIDs, eps, fileName, 
           procId, nProcs, NTotal, NFirst, NSecond, NThird, tree,
           dustPositions, dustVelocities, dustIDs, reduce_bodies_factor, reduce_dust_factor, false);
 
@@ -1311,6 +1312,7 @@ int main(int argc, char** argv)
   {
     tree->localTree.bodies_pos[i] = bodyPositions[i];
     tree->localTree.bodies_vel[i] = bodyVelocities[i];
+//     tree->localTree.bodies_col[i] = bodyColors[i];
     tree->localTree.bodies_ids[i] = bodyIDs[i];
 
     tree->localTree.bodies_Ppos[i] = bodyPositions[i];
@@ -1321,6 +1323,7 @@ int main(int argc, char** argv)
   tree->localTree.bodies_time.h2d();
   tree->localTree.bodies_pos.h2d();
   tree->localTree.bodies_vel.h2d();
+//   tree->localTree.bodies_col.h2d();
   tree->localTree.bodies_Ppos.h2d();
   tree->localTree.bodies_Pvel.h2d();
   tree->localTree.bodies_ids.h2d();

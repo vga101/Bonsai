@@ -158,6 +158,7 @@ class tree_structure
     my_dev::dev_mem<real4> bodies_pos;    //The particles positions
     my_dev::dev_mem<uint4> bodies_key;    //The particles keys
     my_dev::dev_mem<real4> bodies_vel;    //Velocities
+    my_dev::dev_mem<real4> bodies_col;    //Colors    
     my_dev::dev_mem<real4> bodies_acc0;    //Acceleration
     my_dev::dev_mem<real4> bodies_acc1;    //Acceleration
     my_dev::dev_mem<float2> bodies_time;  //The timestep details (.x=tb, .y=te
@@ -303,7 +304,8 @@ class tree_structure
     bodies_acc1.setContext(*devContext);
     bodies_time.setContext(*devContext);
     bodies_ids.setContext(*devContext);
-
+    bodies_col.setContext(*devContext);
+    
     bodies_Ppos.setContext(*devContext);
     bodies_Pvel.setContext(*devContext);
 

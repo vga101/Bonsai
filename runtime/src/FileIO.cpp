@@ -9,9 +9,8 @@
 
 using namespace std;
 
-void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<real4> &bodyVelocities,
-                              std::vector<int> &bodiesIDs,  std::vector<real4> &bodyRgba,
-                              float eps2, string fileName,
+void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<real4> &bodyVelocities, std::vector<real4> &bodyColors,
+                              std::vector<int> &bodiesIDs, float eps2, string fileName,
                               int rank, int procs, int &NTotal2, int &NFirst,
                               int &NSecond, int &NThird, octree *tree,
                               std::vector<real4> &dustPositions, std::vector<real4> &dustVelocities,
@@ -54,7 +53,7 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
   int idummy;
   real4 positions;
   real4 velocity;
-  real4 rgba;
+  real4 color;
 
 
   //Read tipsy header
@@ -99,10 +98,10 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
       velocity.y        = d.vel[1];
       velocity.z        = d.vel[2];
       idummy            = d.phi;
-      rgba.x            = 0.;  // no colors from tipsy for dark matter
-      rgba.y            = 0.;
-      rgba.z            = 0.;
-      rgba.w            = 0.;
+      color.x		= 0.0; // no colors from tipsy for dark matter
+      color.y		= 0.0;
+      color.z		= 0.0;    
+      color.w		= 1.0;      
     }
     else
     {
@@ -116,10 +115,14 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
       velocity.y        = s.vel[1];
       velocity.z        = s.vel[2];
       idummy            = s.phi;
-      rgba.x            = s.rgba[0];
-      rgba.y            = s.rgba[1];
-      rgba.z            = s.rgba[2];
-      rgba.w            = s.rgba[3];
+      color.x           = s.rgba[0];
+      color.y           = s.rgba[1];
+      color.z           = s.rgba[2];
+      color.w           = s.rgba[3];
+//       color.x		= 1.0;
+//       color.y		= 0.0;
+//       color.z		= 0.0;    
+//       color.w		= 1.0;
     }
 
 
@@ -168,7 +171,7 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
       bodyPositions.push_back(positions);
       bodyVelocities.push_back(velocity);
       bodiesIDs.push_back(idummy);
-      bodyRgba.push_back(rgba);
+//       bodyRgba.push_back(rgba);
     #endif
 
     particleCount++;
