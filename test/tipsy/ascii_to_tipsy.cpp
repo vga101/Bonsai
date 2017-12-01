@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string.h>
 #include <vector>
 #include "tipsy.h"
 
@@ -20,9 +21,9 @@ int main(int argc, char* argv[])
     std::vector<dark_particle> vd{};
     std::vector<star_particle> vs{};
 
-    // VG added
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " infile.ascii outfile.tipsy" << std::endl;
+        std::cerr << "Usage: " << argv[0] 
+                  << " infile.ascii outfile.tipsy [--reducebodies #]" << std::endl;
         return 1;
     }
 
@@ -31,7 +32,20 @@ int main(int argc, char* argv[])
 
     std::string inname(argv[1]);
     std::string outname(argv[2]);
+    int reduce_bodies_factor = 1;
 
+    // reducebodies: keep only every n-th particle
+    if (argc == 5 && strcmp(argv[3], "--reducebodies") == 0) {
+        reduce_bodies_factor = atoi(argv[4]);
+        if (reduce_bodies_factor == 0) {
+            std::cout << "Invalid value for reducebodies option" << std::endl;
+            return 1;
+        }
+    }
+    std::cout << "reduce_bodies_factor: " << reduce_bodies_factor << std::endl;
+
+    
+    
     std::ifstream infile(inname);
     std::string line;
 
@@ -44,14 +58,22 @@ int main(int argc, char* argv[])
     float m_s = 0.0f;
     float m_d = 0.0f;
 
+    int particles_read = 0;
+
     while(std::getline(infile, line)) {
 
         if (line.at(0) == '#') {
             // ignore comment lines
-            std::cout << "#" << std::endl;
+            // std::cout << "#" << std::endl;
 
         } else {
             // parse data line
+
+            // reduce particle number
+            if (particles_read % reduce_bodies_factor != 0) {
+                particles_read += 1;
+                continue;
+            }
 
             std::stringstream linestream(line);
             float posx, posy, posz, velx, vely, velz, mass, L_B, L_G, L_R, flag;
@@ -63,7 +85,7 @@ int main(int argc, char* argv[])
             if (flag == 1) {
                 // dark matter
 
-                std::cout << "dm particle " << id_d << " with mass " << mass << std::endl;
+                std::cout << "dm particle id=" << id_d << ": mass=" << mass << std::endl;
                 dark_particle d(mass/MSUN,
                                 posx/KPC, posy/KPC, posz/KPC,
                                 velx/KMS, vely/KMS, velz/KMS,
@@ -73,13 +95,14 @@ int main(int argc, char* argv[])
                 vd.push_back(d);  // add to end of vector
 
                 id_d += 1;
+                particles_read += 1;
 
             } else if (flag == 4) {
                 // star
 
                 // test hack:
                 float L_max = std::max(std::max(L_B, L_G), L_R);
-                std::cout << "star particle " << id_s << " with mass " << mass << std::endl;
+                std::cout << "star particle id=" << id_s << ": mass=" << mass << std::endl;
                 star_particle s(mass/MSUN, 
                                 posx/KPC, posy/KPC, posz/KPC,
                                 velx/KMS, vely/KMS, velz/KMS,
@@ -91,6 +114,8 @@ int main(int argc, char* argv[])
                 vs.push_back(s);  // add to end of vector
 
                 id_s += 1;
+                particles_read += 1;
+
                 if (id_s >= INDEX_D_START) {
                     std::cout << "Error: too many star particles. Overlapping indices." << std::endl;
                     return 1;

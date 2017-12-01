@@ -70,7 +70,7 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
   bodyPositions.reserve(perProc+10);
   bodyVelocities.reserve(perProc+10);
   bodiesIDs.reserve(perProc+10);
-  bodyRgba.reserve(perProc+10);
+  bodyColors.reserve(perProc+10);
   perProc -= 1;
 
   //Start reading

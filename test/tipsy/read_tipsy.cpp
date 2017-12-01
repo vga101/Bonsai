@@ -20,6 +20,7 @@ int main(int argc, char** argv)
     // dark particles
     std::set<int> dark_phis;
 
+    std::cout << "* dark particles:" << std::endl;
     for (int i = 0; i != h.ndark; ++i)
     {
         dark_particle d;
@@ -42,6 +43,7 @@ int main(int argc, char** argv)
     // star particles
     std::set<int> star_phis;
 
+    std::cout << "* star particles:" << std::endl;
     for (int i = 0; i != h.nstar; ++i)
     {
         star_particle s;
@@ -56,7 +58,11 @@ int main(int argc, char** argv)
                   << s.metals << " "
                   << s.tform << " "
                   << s.eps << " "
-                  << s.phi << std::endl;
+                  << s.phi << " "
+                  << s.rgba[0] << " "
+                  << s.rgba[1] << " "
+                  << s.rgba[2] << " "
+                  << s.rgba[3] << std::endl;
         star_phis.insert(s.phi);
     }
 
