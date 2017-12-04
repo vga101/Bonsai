@@ -122,7 +122,7 @@ void throw_if_option_is_used(AnyOption const& opt, std::vector<std::string> argu
 }
 #endif
 
-void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyVelocities,  vector<int> &bodiesIDs,  float eps2,
+void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyVelocities, vector<real4> &bodyColors,  vector<int> &bodiesIDs,  float eps2,
                      string fileName, int rank, int procs, int &NTotal2, int &NFirst, int &NSecond, int &NThird, octree *tree, int reduce_bodies_factor)  
 {
   //Process 0 does the file reading and sends the data
@@ -161,6 +161,7 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
   int idummy;
   real4 positions;
   real4 velocity;
+  real4 color;
 
   #ifndef INDSOFT
      inputFile >> idummy >> positions.w;
@@ -177,6 +178,7 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
   uint perProc = NTotal / procs;
   bodyPositions.reserve(perProc+10);
   bodyVelocities.reserve(perProc+10);
+  bodyColors.reserve(perProc+10);
   bodiesIDs.reserve(perProc+10);
   perProc -= 1;
 
@@ -190,7 +192,8 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
     
     inputFile >> idummy
               >> positions.w >> positions.x >> positions.y >> positions.z
-              >> velocity.x >> velocity.y >> velocity.z;    
+              >> velocity.x >> velocity.y >> velocity.z  
+	      >> color.w >> color.x >> color.y >> color.z;
 
 	globalParticleCount++;
 
@@ -208,6 +211,7 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
     
     bodyPositions.push_back(positions);
     bodyVelocities.push_back(velocity);
+    bodyColors.push_back(color);
     
     #ifndef INDSOFT    
       idummy = particleCount;
@@ -220,11 +224,12 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
   
     if(bodyPositions.size() > perProc && procCntr != procs)
     {       
-      tree->ICSend(procCntr,  &bodyPositions[0], &bodyVelocities[0],  &bodiesIDs[0], (int)bodyPositions.size());
+      tree->ICSend(procCntr,  &bodyPositions[0], &bodyVelocities[0], &bodyColors[0],  &bodiesIDs[0], (int)bodyPositions.size());
       procCntr++;
       
       bodyPositions.clear();
       bodyVelocities.clear();
+      bodyColors.clear();
       bodiesIDs.clear();
     }
   }//end while
@@ -238,7 +243,7 @@ void read_dumbp_file_parallel(vector<real4> &bodyPositions, vector<real4> &bodyV
   LOGF(stderr, "NTotal:  %d\tper proc: %d\tFor ourself: %d \n", NTotal, perProc, (int)bodiesIDs.size());
 }
 
-void read_generate_cube(vector<real4> &bodyPositions, vector<real4> &bodyVelocities,
+void read_generate_cube(vector<real4> &bodyPositions, vector<real4> &bodyVelocities, vector<real4> &bodyColors, 
                               vector<int> &bodiesIDs,  float eps2, string fileName, 
                               int rank, int procs, int &NTotal2, int &NFirst, 
                               int &NSecond, int &NThird, octree *tree,
@@ -260,6 +265,7 @@ void read_generate_cube(vector<real4> &bodyPositions, vector<real4> &bodyVelocit
   int idummy;
   real4 positions;
   real4 velocity;
+  real4 color;
 
      
   //Read tipsy header  
@@ -276,6 +282,7 @@ void read_generate_cube(vector<real4> &bodyPositions, vector<real4> &bodyVelocit
   uint perProc = NTotal / procs;
   bodyPositions.reserve(perProc+10);
   bodyVelocities.reserve(perProc+10);
+  bodyColors.reserve(perProc+10);
   bodiesIDs.reserve(perProc+10);
   perProc -= 1;
 
@@ -298,19 +305,25 @@ void read_generate_cube(vector<real4> &bodyPositions, vector<real4> &bodyVelocit
       velocity.x        = 0.001*drand48();
       velocity.y        = 0.001*drand48();
       velocity.z        = 0.001*drand48();
-
+      color.x     	= 1.0;
+      color.y       	= 0.0;
+      color.z       	= 0.0;
+      color.w       	= 1.0;
+      
       globalParticleCount++;
       bodyPositions.push_back(positions);
       bodyVelocities.push_back(velocity);
+      bodyColors.push_back(color);
       bodiesIDs.push_back(globalParticleCount);  
   
     if(bodyPositions.size() > perProc && procCntr != procs)
     { 
-      tree->ICSend(procCntr,  &bodyPositions[0], &bodyVelocities[0],  &bodiesIDs[0], (int)bodyPositions.size());
+      tree->ICSend(procCntr,  &bodyPositions[0], &bodyVelocities[0], &bodyColors[0],  &bodiesIDs[0], (int)bodyPositions.size());
       procCntr++;
       
       bodyPositions.clear();
       bodyVelocities.clear();
+      bodyColors.clear();
       bodiesIDs.clear();
     }
   }//end while
@@ -587,12 +600,11 @@ int main(int argc, char** argv)
   vector<real4> bodyVelocities;
   vector<real4> bodyColors;  
   vector<int>   bodyIDs;
-  //vector<real4> bodyRgba;
 
   vector<real4> dustPositions;
   vector<real4> dustVelocities;
   vector<int>   dustIDs;  
-  
+  printf("color per particle not implemented for the dust!\n");
 
   float eps      = 0.05f;
   float theta    = 0.75f;
@@ -1023,6 +1035,7 @@ int main(int argc, char** argv)
 #ifdef WAR_OF_GALAXIES
       std::cout << "WarOfGalaxies: Input file is used as dummy particles." << std::endl;
       for (auto & id : bodyIDs) id = id - id % 10 + 9;
+//    for (auto & id : bodyIDs) id = id; //unique id's, but player determination messed up (also in WOGManager.cpp for the general files)
 
       // get center of mass
       real mass;
@@ -1059,8 +1072,9 @@ int main(int argc, char** argv)
       for (auto &p : bodyPositions)
       {
         p.x -= center_of_mass.x;
-        p.y -= center_of_mass.y;
-        p.z -= center_of_mass.z + 10000;
+	p.y -= center_of_mass.y;//see the dummy particles
+// 	p.z -= center_of_mass.z + 10000;//hide the dummy particles
+	p.z -= center_of_mass.z;
       }
 
       // steady
@@ -1083,7 +1097,7 @@ int main(int argc, char** argv)
     }
     else
     {
-      tree->ICRecv(0, bodyPositions, bodyVelocities,  bodyIDs);
+      tree->ICRecv(0, bodyPositions, bodyVelocities, bodyColors,  bodyIDs);
     }
   }
   else if(nMilkyWay >= 0)
@@ -1307,14 +1321,17 @@ int main(int argc, char** argv)
   tree->localTree.setN((int)bodyPositions.size());
   tree->allocateParticleMemory(tree->localTree);
 
+//   printf("number of particles %d\n",bodyPositions.size());
+  
   //Load data onto the device
   for(uint i=0; i < bodyPositions.size(); i++)
   {
     tree->localTree.bodies_pos[i] = bodyPositions[i];
     tree->localTree.bodies_vel[i] = bodyVelocities[i];
-//     tree->localTree.bodies_col[i] = bodyColors[i];
+    tree->localTree.bodies_col[i] = bodyColors[i];
+//  real4 cc2 =  tree->localTree.bodies_col[i];
+//  printf("colors: %d %f %f %f %f\n", i, cc2.x, cc2.y, cc2.z, cc2.w);    
     tree->localTree.bodies_ids[i] = bodyIDs[i];
-
     tree->localTree.bodies_Ppos[i] = bodyPositions[i];
     tree->localTree.bodies_Pvel[i] = bodyVelocities[i];
     tree->localTree.bodies_time[i] = make_float2(tree->get_t_current(), tree->get_t_current());
@@ -1323,7 +1340,7 @@ int main(int argc, char** argv)
   tree->localTree.bodies_time.h2d();
   tree->localTree.bodies_pos.h2d();
   tree->localTree.bodies_vel.h2d();
-//   tree->localTree.bodies_col.h2d();
+  tree->localTree.bodies_col.h2d();
   tree->localTree.bodies_Ppos.h2d();
   tree->localTree.bodies_Pvel.h2d();
   tree->localTree.bodies_ids.h2d();

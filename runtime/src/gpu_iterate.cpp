@@ -237,6 +237,7 @@ bool octree::addGalaxy(int galaxyID)
   
     this->localTree.bodies_pos.d2h();
     this->localTree.bodies_vel.d2h();
+    this->localTree.bodies_col.d2h();
     this->localTree.bodies_ids.d2h();
     
     vector<real4> newGalaxy_pos;
@@ -245,6 +246,7 @@ bool octree::addGalaxy(int galaxyID)
     vector<int> newGalaxy_ids;
     vector<real4> currentGalaxy_pos;
     vector<real4> currentGalaxy_vel;
+    vector<real4> currentGalaxy_col;
     vector<int>   currentGalaxy_ids;    
 
     int n_particles = this->localTree.n + this->localTree.n_dust;
@@ -252,6 +254,8 @@ bool octree::addGalaxy(int galaxyID)
                           &this->localTree.bodies_pos[0]+n_particles);
     currentGalaxy_vel.insert(currentGalaxy_vel.begin(), &this->localTree.bodies_vel[0],
                           &this->localTree.bodies_vel[0]+n_particles);
+    currentGalaxy_col.insert(currentGalaxy_col.begin(), &this->localTree.bodies_col[0],
+                          &this->localTree.bodies_col[0]+n_particles);    
     currentGalaxy_ids.insert(currentGalaxy_ids.begin(), &this->localTree.bodies_ids[0],
                           &this->localTree.bodies_ids[0]+n_particles);    
     
@@ -319,6 +323,7 @@ bool octree::addGalaxy(int galaxyID)
   this->localTree.bodies_pos.d2h();
   this->localTree.bodies_acc0.d2h();  
   this->localTree.bodies_vel.d2h();
+  this->localTree.bodies_col.d2h();
   this->localTree.bodies_time.d2h();
   this->localTree.bodies_ids.d2h();
   this->localTree.bodies_Ppos.d2h();
@@ -332,6 +337,9 @@ bool octree::addGalaxy(int galaxyID)
 
   memcpy(&this->localTree.bodies_vel [0], &currentGalaxy_vel[0], sizeof(real4)*old_n);
   memcpy(&this->localTree.bodies_vel [old_n], &currentGalaxy_vel[old_n + old_ndust], sizeof(real4)*n_addGalaxy);
+  
+  memcpy(&this->localTree.bodies_col [0], &currentGalaxy_col[0], sizeof(real4)*old_n);
+  memcpy(&this->localTree.bodies_col [old_n], &currentGalaxy_col[old_n + old_ndust], sizeof(real4)*n_addGalaxy);  
   
   memcpy(&this->localTree.bodies_ids[0], &currentGalaxy_ids[0], sizeof(int)*old_n);
   memcpy(&this->localTree.bodies_ids[old_n], &currentGalaxy_ids[old_n + old_ndust], sizeof(int)*n_addGalaxy);
@@ -384,6 +392,7 @@ bool octree::addGalaxy(int galaxyID)
   this->localTree.bodies_pos.h2d();
   this->localTree.bodies_acc0.h2d();  
   this->localTree.bodies_vel.h2d();
+  this->localTree.bodies_col.h2d();
   this->localTree.bodies_time.h2d();
   this->localTree.bodies_ids.h2d();
   
@@ -422,6 +431,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
   this->localTree.bodies_pos.d2h();
   this->localTree.bodies_acc0.d2h();
   this->localTree.bodies_vel.d2h();
+  this->localTree.bodies_col.d2h();
   this->localTree.bodies_time.d2h();
   this->localTree.bodies_ids.d2h();
   this->localTree.bodies_Ppos.d2h();
@@ -429,6 +439,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
 
   vector<real4> new_pos;
   vector<real4> new_vel;
+  vector<real4> new_col;
   vector<int> new_ids;
   int old_nb_particles = this->localTree.n;
   int new_nb_particles = old_nb_particles + galaxy.pos.size();
@@ -437,6 +448,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
   {
     new_pos.push_back(this->localTree.bodies_pos[i]);
     new_vel.push_back(this->localTree.bodies_vel[i]);
+    new_col.push_back(this->localTree.bodies_col[i]);
     new_ids.push_back(this->localTree.bodies_ids[i]);
   }
 
@@ -444,6 +456,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
   {
     new_pos.push_back(galaxy.pos[i]);
     new_vel.push_back(galaxy.vel[i]);
+    new_col.push_back(galaxy.col[i]);
     new_ids.push_back(galaxy.ids[i]);
   }
 
@@ -456,6 +469,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
   // Copy back to host storage
   memcpy(&this->localTree.bodies_pos[0], &new_pos[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_vel[0], &new_vel[0], sizeof(real4) * new_nb_particles);
+  memcpy(&this->localTree.bodies_col[0], &new_col[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_ids[0], &new_ids[0], sizeof(int) * new_nb_particles);
 
   float2 curTime = this->localTree.bodies_time[0];
@@ -468,6 +482,7 @@ void octree::releaseGalaxy(Galaxy const& galaxy)
   this->localTree.bodies_pos.h2d();
   this->localTree.bodies_acc0.h2d();
   this->localTree.bodies_vel.h2d();
+  this->localTree.bodies_col.h2d();
   this->localTree.bodies_time.h2d();
   this->localTree.bodies_ids.h2d();
 
@@ -483,6 +498,7 @@ void octree::removeGalaxy(int user_id)
   // Get particle data back to the host so we can add our new data
   this->localTree.bodies_pos.d2h();
   this->localTree.bodies_vel.d2h();
+  this->localTree.bodies_col.d2h();
   this->localTree.bodies_ids.d2h();
   this->localTree.bodies_acc0.d2h();
   this->localTree.bodies_time.d2h();
@@ -491,6 +507,7 @@ void octree::removeGalaxy(int user_id)
 
   vector<real4> new_pos;
   vector<real4> new_vel;
+  vector<real4> new_col;
   vector<int> new_ids;
   int old_nb_particles = this->localTree.n;
   int new_nb_particles = 0;
@@ -500,6 +517,7 @@ void octree::removeGalaxy(int user_id)
 	if (this->localTree.bodies_ids[i] % 10 == user_id) continue;
     new_pos.push_back(this->localTree.bodies_pos[i]);
     new_vel.push_back(this->localTree.bodies_vel[i]);
+    new_col.push_back(this->localTree.bodies_col[i]);
     new_ids.push_back(this->localTree.bodies_ids[i]);
     ++new_nb_particles;
   }
@@ -513,6 +531,7 @@ void octree::removeGalaxy(int user_id)
   // Copy back to host storage
   memcpy(&this->localTree.bodies_pos[0], &new_pos[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_vel[0], &new_vel[0], sizeof(real4) * new_nb_particles);
+  memcpy(&this->localTree.bodies_col[0], &new_col[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_ids[0], &new_ids[0], sizeof(int) * new_nb_particles);
 
   float2 curTime = this->localTree.bodies_time[0];
@@ -523,6 +542,7 @@ void octree::removeGalaxy(int user_id)
   this->localTree.bodies_pos.h2d();
   this->localTree.bodies_acc0.h2d();
   this->localTree.bodies_vel.h2d();
+  this->localTree.bodies_col.h2d();
   this->localTree.bodies_time.h2d();
   this->localTree.bodies_ids.h2d();
 
@@ -549,6 +569,7 @@ void octree::removeParticles(real deletion_radius_square, my_dev::dev_mem<uint> 
   // Get particle data back to the host so we can add our new data
   this->localTree.bodies_pos.d2h();
   this->localTree.bodies_vel.d2h();
+  this->localTree.bodies_col.d2h();
   this->localTree.bodies_ids.d2h();
   this->localTree.bodies_acc0.d2h();
   this->localTree.bodies_time.d2h();
@@ -557,6 +578,7 @@ void octree::removeParticles(real deletion_radius_square, my_dev::dev_mem<uint> 
 
   vector<real4> new_pos;
   vector<real4> new_vel;
+  vector<real4> new_col;
   vector<int> new_ids;
   int old_nb_particles = this->localTree.n;
   int new_nb_particles = 0;
@@ -572,6 +594,7 @@ void octree::removeParticles(real deletion_radius_square, my_dev::dev_mem<uint> 
 	}
     new_pos.push_back(this->localTree.bodies_pos[i]);
     new_vel.push_back(this->localTree.bodies_vel[i]);
+    new_col.push_back(this->localTree.bodies_col[i]);
     new_ids.push_back(this->localTree.bodies_ids[i]);
     ++new_nb_particles;
   }
@@ -585,6 +608,7 @@ void octree::removeParticles(real deletion_radius_square, my_dev::dev_mem<uint> 
   // Copy back to host storage
   memcpy(&this->localTree.bodies_pos[0], &new_pos[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_vel[0], &new_vel[0], sizeof(real4) * new_nb_particles);
+  memcpy(&this->localTree.bodies_col[0], &new_col[0], sizeof(real4) * new_nb_particles);
   memcpy(&this->localTree.bodies_ids[0], &new_ids[0], sizeof(int) * new_nb_particles);
 
   float2 curTime = this->localTree.bodies_time[0];
@@ -595,6 +619,7 @@ void octree::removeParticles(real deletion_radius_square, my_dev::dev_mem<uint> 
   this->localTree.bodies_pos.h2d();
   this->localTree.bodies_acc0.h2d();
   this->localTree.bodies_vel.h2d();
+  this->localTree.bodies_col.h2d();
   this->localTree.bodies_time.h2d();
   this->localTree.bodies_ids.h2d();
 
@@ -880,12 +905,14 @@ bool octree::iterate_once(IterationData &idata) {
         double tDens0 = get_time();
         localTree.bodies_pos.d2h();
         localTree.bodies_vel.d2h();
+	localTree.bodies_col.d2h();
         localTree.bodies_ids.d2h();
 
         double tDens1 = get_time();
         const DENSITY dens(procId, nProcs, localTree.n,
                            &localTree.bodies_pos[0],
                            &localTree.bodies_vel[0],
+// 			   &localTree.bodies_col[0],
                            &localTree.bodies_ids[0],
                            1, 2.33e9, 20, "density", t_current);
 
@@ -896,6 +923,7 @@ bool octree::iterate_once(IterationData &idata) {
         const DISKSTATS diskstats(procId, nProcs, localTree.n,
                            &localTree.bodies_pos[0],
                            &localTree.bodies_vel[0],
+// 			   &localTree.bodies_col[0],
                            &localTree.bodies_ids[0],
                            1, 2.33e9, "diskstats", t_current);
 
@@ -924,17 +952,18 @@ bool octree::iterate_once(IterationData &idata) {
 
         localTree.bodies_pos.d2h();
         localTree.bodies_vel.d2h();
+	localTree.bodies_col.d2h();
         localTree.bodies_ids.d2h();
 
         if(nProcs <= 16)
         {
-          write_dumbp_snapshot_parallel(&localTree.bodies_pos[0], &localTree.bodies_vel[0],
+          write_dumbp_snapshot_parallel(&localTree.bodies_pos[0], &localTree.bodies_vel[0], &localTree.bodies_col[0], 
               &localTree.bodies_ids[0], localTree.n + localTree.n_dust, fileName.c_str(), t_current) ;
         }
         else
         {
           sprintf(&fileName[0], "%s_%010.4f-%d", snapshotFile.c_str(), time + snapShotAdd, procId);
-          write_snapshot_per_process(&localTree.bodies_pos[0], &localTree.bodies_vel[0],
+          write_snapshot_per_process(&localTree.bodies_pos[0], &localTree.bodies_vel[0], &localTree.bodies_col[0],
                                      &localTree.bodies_ids[0], localTree.n + localTree.n_dust,
                                      fileName.c_str(), t_current) ;
         }
@@ -1105,17 +1134,18 @@ void octree::iterate_setup(IterationData &idata) {
 
         localTree.bodies_pos.d2h();
         localTree.bodies_vel.d2h();
+	localTree.bodies_col.d2h();
         localTree.bodies_ids.d2h();
 
         if(nProcs <= 16)
         {
-          write_dumbp_snapshot_parallel(&localTree.bodies_pos[0], &localTree.bodies_vel[0],
+          write_dumbp_snapshot_parallel(&localTree.bodies_pos[0], &localTree.bodies_vel[0], &localTree.bodies_col[0],
               &localTree.bodies_ids[0], localTree.n + localTree.n_dust, fileName.c_str(), t_current) ;
         }
         else
         {
           sprintf(&fileName[0], "%s_%010.4f-%d", snapshotFile.c_str(), time + snapShotAdd, procId);
-          write_snapshot_per_process(&localTree.bodies_pos[0], &localTree.bodies_vel[0],
+          write_snapshot_per_process(&localTree.bodies_pos[0], &localTree.bodies_vel[0], &localTree.bodies_col[0],
                                      &localTree.bodies_ids[0], localTree.n + localTree.n_dust,
                                      fileName.c_str(), t_current) ;
         }
@@ -1130,12 +1160,14 @@ void octree::iterate_setup(IterationData &idata) {
       double tDens0 = get_time();
       localTree.bodies_pos.d2h();
       localTree.bodies_vel.d2h();
+      localTree.bodies_col.d2h();
       localTree.bodies_ids.d2h();
 
       double tDens1 = get_time();
       const DENSITY dens(procId, nProcs, localTree.n,
                          &localTree.bodies_pos[0],
                          &localTree.bodies_vel[0],
+// 			 &localTree.bodies_col[0],
                          &localTree.bodies_ids[0],
                          1, 2.33e9, 20, "density", t_current);
 
@@ -1146,6 +1178,7 @@ void octree::iterate_setup(IterationData &idata) {
       const DISKSTATS diskstats(procId, nProcs, localTree.n,
                          &localTree.bodies_pos[0],
                          &localTree.bodies_vel[0],
+// 			 &localTree.bodies_col[0],
                          &localTree.bodies_ids[0],
                          1, 2.33e9, "diskstats", t_current);
 
@@ -1845,7 +1878,8 @@ void octree::checkRemovalDistance(tree_structure &tree)
                                                                                                                                                             
   tree.bodies_pos.d2h();    //The particles positions                                                                                                       
   tree.bodies_key.d2h();    //The particles keys                                                                                                            
-  tree.bodies_vel.d2h();    //Velocities                                                                                                                    
+  tree.bodies_vel.d2h();    //Velocities   
+  tree.bodies_col.d2h();    //Color 
   tree.bodies_acc0.d2h();    //Acceleration                                                                                                                 
   tree.bodies_acc1.d2h();    //Acceleration                                                                                                                 
   tree.bodies_time.d2h();  //The timestep details (.x=tb, .y=te                                                                                             
@@ -1871,7 +1905,8 @@ void octree::checkRemovalDistance(tree_structure &tree)
                                                                                                                                                             
     tree.bodies_pos[storeIdx] = tree.bodies_pos[i];                                                                                                         
     tree.bodies_key[storeIdx] = tree.bodies_key[i];                                                                                                         
-    tree.bodies_vel[storeIdx] = tree.bodies_vel[i];                                                                                                         
+    tree.bodies_vel[storeIdx] = tree.bodies_vel[i];    
+    tree.bodies_col[storeIdx] = tree.bodies_col[i];  
     tree.bodies_acc0[storeIdx] = tree.bodies_acc0[i];                                                                                                       
     tree.bodies_acc1[storeIdx] = tree.bodies_acc1[i];                                                                                                       
     tree.bodies_time[storeIdx] = tree.bodies_time[i];                                                                                                       
@@ -1916,7 +1951,8 @@ void octree::checkRemovalDistance(tree_structure &tree)
     //Now copy them back!!! Duhhhhh                                                                                                                         
     tree.bodies_pos.h2d();    //The particles positions                                                                                                     
     tree.bodies_key.h2d();    //The particles keys                                                                                                          
-    tree.bodies_vel.h2d();    //Velocities                                                                                                                  
+    tree.bodies_vel.h2d();    //Velocities      
+    tree.bodies_col.h2d();    //Color 
     tree.bodies_acc0.h2d();    //Acceleration                                                                                                               
     tree.bodies_acc1.h2d();    //Acceleration                                                                                                               
     tree.bodies_time.h2d();  //The timestep details (.x=tb, .y=te                                                                                           

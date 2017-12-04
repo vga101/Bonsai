@@ -374,6 +374,7 @@ typedef struct bodyStruct
 {
   real4 pos;
   real4 vel;
+  real4 col;
   real4 acc0;
   real4 acc1;
   real4 Ppos;
@@ -391,6 +392,7 @@ KERNEL_DECLARE(extractOutOfDomainParticlesAdvanced)(int n_extract,
                                                        real4 *Pvel,
                                                        real4 *pos,
                                                        real4 *vel,
+						       real4 *col,
                                                        real4 *acc0,
                                                        real4 *acc1,
                                                        float2 *time,
@@ -409,6 +411,7 @@ KERNEL_DECLARE(extractOutOfDomainParticlesAdvanced)(int n_extract,
   destination[id].Pvel = Pvel[extractList[id]];
   destination[id].pos  = pos[extractList[id]];
   destination[id].vel  = vel[extractList[id]];
+  destination[id].col  = col[extractList[id]];
   destination[id].acc0  = acc0[extractList[id]];
   destination[id].acc1  = acc1[extractList[id]];
   destination[id].time  = time[extractList[id]];
@@ -427,6 +430,7 @@ KERNEL_DECLARE(gpu_internalMove)(int       n_extract,
                                         real4     *Pvel,
                                         real4     *pos,
                                         real4     *vel,
+					real4     *col,
                                         real4     *acc0,
                                         real4     *acc1,
                                         float2    *time,
@@ -452,6 +456,7 @@ KERNEL_DECLARE(gpu_internalMove)(int       n_extract,
     Pvel[dstIdx] = Pvel[srcIdx];
     pos[dstIdx]  = pos[srcIdx];
     vel[dstIdx]  = vel[srcIdx];
+    col[dstIdx]  = col[srcIdx];
     acc0[dstIdx] = acc0[srcIdx];
     acc1[dstIdx] = acc1[srcIdx];
     time[dstIdx] = time[srcIdx];
@@ -468,6 +473,7 @@ KERNEL_DECLARE(gpu_insertNewParticles)(int       n_extract,
                                               real4     *Pvel,
                                               real4     *pos,
                                               real4     *vel,
+					      real4     *col,
                                               real4     *acc0,
                                               real4     *acc1,
                                               float2    *time,
@@ -489,6 +495,7 @@ KERNEL_DECLARE(gpu_insertNewParticles)(int       n_extract,
   Pvel[idx]     = source[id].Pvel;
   pos[idx]      = source[id].pos;
   vel[idx]      = source[id].vel;
+  col[idx]      = source[id].col;
   acc0[idx]     = source[id].acc0;
   acc1[idx]     = source[id].acc1;
   time[idx]     = source[id].time;
@@ -653,6 +660,7 @@ KERNEL_DECLARE(gpu_internalMoveSFC2) (int       n_extract,
                                   real4     *Pvel,
                                   real4     *pos,
                                   real4     *vel,
+				  real4     *col,
                                   real4     *acc0,
                                   real4     *acc1,
                                   float2    *time,
@@ -684,6 +692,7 @@ KERNEL_DECLARE(gpu_internalMoveSFC2) (int       n_extract,
     Pvel[dstIdx] = Pvel[srcIdx];
     pos[dstIdx]  = pos[srcIdx];
     vel[dstIdx]  = vel[srcIdx];
+    col[dstIdx]  = col[srcIdx];
     acc0[dstIdx] = acc0[srcIdx];
     acc1[dstIdx] = acc1[srcIdx];
     time[dstIdx] = time[srcIdx];
@@ -703,6 +712,7 @@ KERNEL_DECLARE(gpu_internalMoveSFC) (int       n_extract,
                                   real4     *Pvel,
                                   real4     *pos,
                                   real4     *vel,
+				  real4     *col,
                                   real4     *acc0,
                                   real4     *acc1,
                                   float2    *time,
@@ -734,6 +744,7 @@ KERNEL_DECLARE(gpu_internalMoveSFC) (int       n_extract,
     Pvel[dstIdx] = Pvel[srcIdx];
     pos[dstIdx]  = pos[srcIdx];
     vel[dstIdx]  = vel[srcIdx];
+    col[dstIdx]  = col[srcIdx];
     acc0[dstIdx] = acc0[srcIdx];
     acc1[dstIdx] = acc1[srcIdx];
     time[dstIdx] = time[srcIdx];
@@ -751,6 +762,7 @@ KERNEL_DECLARE(gpu_extractOutOfDomainParticlesAdvancedSFC2)(
                                                        real4 *Pvel,
                                                        real4 *pos,
                                                        real4 *vel,
+						       real4 *col,
                                                        real4 *acc0,
                                                        real4 *acc1,
                                                        float2 *time,
@@ -789,6 +801,7 @@ KERNEL_DECLARE(gpu_extractOutOfDomainParticlesAdvancedSFC2)(
     shmem[threadIdx.x].Pvel  = Pvel[extractList[offset+id].y];
     shmem[threadIdx.x].pos   = pos[extractList[offset+id].y];
     shmem[threadIdx.x].vel   = vel[extractList[offset+id].y];
+    shmem[threadIdx.x].col   = col[extractList[offset+id].y];
     shmem[threadIdx.x].acc0  = acc0[extractList[offset+id].y];
     shmem[threadIdx.x].acc1  = acc1[extractList[offset+id].y];
     shmem[threadIdx.x].time  = time[extractList[offset+id].y];
@@ -862,6 +875,7 @@ KERNEL_DECLARE(gpu_extractOutOfDomainParticlesAdvancedSFC2)(
         shmem[threadIdx.x].Pvel  = Pvel[readIdx];
         shmem[threadIdx.x].pos   = pos[readIdx];
         shmem[threadIdx.x].vel   = vel[readIdx];
+	shmem[threadIdx.x].col   = col[readIdx];
       }
     }
     else
@@ -1054,6 +1068,7 @@ KERNEL_DECLARE(gpu_extractOutOfDomainParticlesAdvancedSFC)(
                                                        real4 *Pvel,
                                                        real4 *pos,
                                                        real4 *vel,
+                                                       real4 *col,
                                                        real4 *acc0,
                                                        real4 *acc1,
                                                        float2 *time,
@@ -1073,6 +1088,7 @@ KERNEL_DECLARE(gpu_extractOutOfDomainParticlesAdvancedSFC)(
   destination[id].Pvel = Pvel[extractList[offset+id]];
   destination[id].pos  = pos[extractList[offset+id]];
   destination[id].vel  = vel[extractList[offset+id]];
+  destination[id].col  = col[extractList[offset+id]];
   destination[id].acc0  = acc0[extractList[offset+id]];
   destination[id].acc1  = acc1[extractList[offset+id]];
   destination[id].time  = time[extractList[offset+id]];
@@ -1088,6 +1104,7 @@ KERNEL_DECLARE(gpu_insertNewParticlesSFC)(int       n_extract,
                                               real4     *Pvel,
                                               real4     *pos,
                                               real4     *vel,
+					      real4     *col,
                                               real4     *acc0,
                                               real4     *acc1,
                                               float2    *time,
@@ -1110,6 +1127,7 @@ KERNEL_DECLARE(gpu_insertNewParticlesSFC)(int       n_extract,
   Pvel[idx]     = source[id].Pvel;
   pos[idx]      = source[id].pos;
   vel[idx]      = source[id].vel;
+  col[idx]      = source[id].col;
   acc0[idx]     = source[id].acc0;
   acc1[idx]     = source[id].acc1;
   time[idx]     = source[id].time;

@@ -82,6 +82,7 @@ typedef struct bodyStruct
 {
   real4 pos;
   real4 vel;
+  real4 col;
   real4 acc0;
   real4 acc1;
   real4 Ppos;
@@ -503,7 +504,7 @@ protected:
   ///////////////////////
 
   /////////////////
-  void write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, int *ids, int n, string fileName);
+  void write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int *ids, int n, string fileName);
 
   void   to_binary(int);
   void   to_binary(uint2);
@@ -533,10 +534,10 @@ public:
 
    my_dev::context * getDevContext() { return &devContext; };        //Pointer so destructor is only called once  
 
-   void write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName, float time) ;
-   void write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName,
+   void write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName, float time) ;
+   void write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName,
                                             int NCombTotal, int NCombFirst, int NCombSecond, int NCombThird, float time);
-   void write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName, float time);
+   void write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName, float time);
 
    void set_src_directory(string src_dir);
 
@@ -742,8 +743,8 @@ public:
    //Local Essential Tree related functions
 
 
-  void ICRecv(int procId, vector<real4> &bodyPositions, vector<real4> &bodyVelocities,  vector<int> &bodiesIDs);
-  void ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities,  int *bodiesIDs, int size);
+  void ICRecv(int procId, vector<real4> &bodyPositions, vector<real4> &bodyVelocities, vector<real4> &bodyColors,  vector<int> &bodiesIDs);
+  void ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors,  int *bodiesIDs, int size);
 
   void build_NewTopLevels(int n_bodies,
                        uint4 *keys,

@@ -107,7 +107,7 @@ void octree::write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, i
 */
 
 //Version that writes the BD dump format
-void octree::write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName) {
+void octree::write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName) {
   char fullFileName[256];
   sprintf(fullFileName, "%s", fileName.c_str());
 
@@ -140,7 +140,7 @@ void octree::write_dumbp_snapshot(real4 *bodyPositions, real4 *bodyVelocities, i
   fprintf(stdout, "Wrote %d bodies to dump file \n", n);
 };
 
-void octree::write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName, float time)
+void octree::write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName, float time)
 {
     NTotal = n;
     NFirst = NSecond = NThird = 0;
@@ -201,7 +201,11 @@ void octree::write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocit
         d.vel[1] = bodyVelocities[i].y;
         d.vel[2] = bodyVelocities[i].z;
         d.phi = bodyIds[i];      //Custom change to tipsy format
-
+//         d.col[0] = bodyColors[i].x;
+//         d.col[1] = bodyColors[i].y;
+//         d.col[2] = bodyColors[i].z;
+        
+        
         outputFile.write((char*)&d, sizeof(d));
       } //end if
     } //end i loop
@@ -222,6 +226,9 @@ void octree::write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocit
         s.vel[1] = bodyVelocities[i].y;
         s.vel[2] = bodyVelocities[i].z;
         s.phi = bodyIds[i];      //Custom change to tipsy format
+//         s.col[0] = bodyColors[i].x;
+//         s.col[1] = bodyColors[i].y;
+//         s.col[2] = bodyColors[i].z;        
 
         s.metals = 0;
         s.tform = 0;
@@ -240,7 +247,7 @@ void octree::write_snapshot_per_process(real4 *bodyPositions, real4 *bodyVelocit
 
 
 
-void octree::write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName,
+void octree::write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName,
                                                  int NCombTotal, int NCombFirst, int NCombSecond, int NCombThird, float time) 
 {
   #ifdef TIPSYOUTPUT  
@@ -271,23 +278,27 @@ void octree::write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bo
     //Buffer to store complete snapshot
     vector<real4> allPositions;
     vector<real4> allVelocities;
+    vector<real4> allColors;
     vector<int> allIds;
     
     allPositions.insert(allPositions.begin(), &bodyPositions[0], &bodyPositions[n]);
     allVelocities.insert(allVelocities.begin(), &bodyVelocities[0], &bodyVelocities[n]);
+    allColors.insert(allColors.begin(), &bodyColors[0], &bodyColors[n]);
     allIds.insert(allIds.begin(), &bodyIds[0], &bodyIds[n]);
     
     //Now receive the data from the other processes
     vector<real4> extPositions;
     vector<real4> extVelocities;
+    vector<real4> extColors;
     vector<int>   extIds;
     
     for(int recvFrom=1; recvFrom < mpiGetNProcs(); recvFrom++)
     {
-      ICRecv(recvFrom, extPositions, extVelocities,  extIds);
+      ICRecv(recvFrom, extPositions, extVelocities, extColors,  extIds);
       
       allPositions.insert(allPositions.end(), extPositions.begin(), extPositions.end());
       allVelocities.insert(allVelocities.end(), extVelocities.begin(), extVelocities.end());
+      allColors.insert(allColors.end(), extColors.begin(), extColors.end());
       allIds.insert(allIds.end(), extIds.begin(), extIds.end());     
     }
     
@@ -345,12 +356,12 @@ void octree::write_dumbp_snapshot_parallel_tipsy(real4 *bodyPositions, real4 *bo
   else
   {
     //All other ranks send their data to proess 0
-    ICSend(0,  bodyPositions, bodyVelocities,  bodyIds, n);
+    ICSend(0,  bodyPositions, bodyVelocities, bodyColors,  bodyIds, n);
   }
  #endif
 }
 
-void octree::write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelocities, int* bodyIds, int n, string fileName, float time) 
+void octree::write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors, int* bodyIds, int n, string fileName, float time) 
 {
   
   //If we use individual softening then first sync the particle types
@@ -383,7 +394,7 @@ void octree::write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelo
     char fullFileName[256];
     sprintf(fullFileName, "%s", fileName.c_str());
     string tempName; tempName.assign(fullFileName);
-    write_dumbp_snapshot_parallel_tipsy(bodyPositions, bodyVelocities, bodyIds, n, tempName,
+    write_dumbp_snapshot_parallel_tipsy(bodyPositions, bodyVelocities, bodyColors, bodyIds, n, tempName,
                                         NCombTotal, NCombFirst, NCombSecond, NCombThird, time);
     return;
   #endif
@@ -413,12 +424,13 @@ void octree::write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelo
     //Now receive the data from the other processes
     vector<real4> extPositions;
     vector<real4> extVelocities;
+    vector<real4> extColors;
     vector<int>   extIds;
     
     int particleCount = 0;    
     for(int recvFrom=1; recvFrom < mpiGetNProcs(); recvFrom++)
     {
-      ICRecv(recvFrom, extPositions, extVelocities,  extIds);
+      ICRecv(recvFrom, extPositions, extVelocities, extColors,  extIds);
       
       for(unsigned int i=0; i < extPositions.size() ; i++)
       {
@@ -455,7 +467,7 @@ void octree::write_dumbp_snapshot_parallel(real4 *bodyPositions, real4 *bodyVelo
   else
   {
     //All other ranks send their data to proess 0
-    ICSend(0,  bodyPositions, bodyVelocities,  bodyIds, n);
+    ICSend(0,  bodyPositions, bodyVelocities, bodyColors,  bodyIds, n);
   }
 };
 

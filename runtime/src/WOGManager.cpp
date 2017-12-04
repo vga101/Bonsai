@@ -222,6 +222,7 @@ json WOGManager::execute_json(std::string const& json_request_string)
     std::vector<double> vector_velocity = json_request["velocity"].as<std::vector<double>>();
     if (vector_velocity.size() > 3) throw std::runtime_error("Invalid dimension of velocity vector");
 
+    
     real4 position = make_real4(0.0, 0.0, 0.0, 0.0);
 
     if (vector_position.size() > 0) {
@@ -255,6 +256,8 @@ json WOGManager::execute_json(std::string const& json_request_string)
     if (vector_velocity.size() > 2) {
       velocity.z = vector_velocity[2] * window_height / simulation_plane_height;
     }
+    
+
 
     #ifdef DEBUG_PRINT
       std::cout << "user_id: " << user_id << std::endl;
@@ -268,8 +271,10 @@ json WOGManager::execute_json(std::string const& json_request_string)
     galaxy.accelerate(velocity);
 
     // Since the particle ids are not needed for the simulation, we use them to store the user_id in the first digit.
-	for (auto & id : galaxy.ids) id = id - id % 10 + user_id;
+    for (auto & id : galaxy.ids) id = id - id % 10 + user_id; 
+//  for (auto & id : galaxy.ids) id = id; //unique id's, but player determination messed up (also in main.cpp for the dummy file)    
 
+    std::cout << "DEBUG " << galaxy.vel.size() << "   " << galaxy.col.size() <<std::endl;
     tree->releaseGalaxy(galaxy);
 	user_particles[user_id] += galaxy.pos.size();
 

@@ -170,10 +170,12 @@ void octree::sort_bodies(tree_structure &tree, bool doDomainUpdate) {
   if(oneRunFull == 1)
   {
     my_dev::dev_mem<real4>  real4Buffer1(devContext);
+    my_dev::dev_mem<real4>  real4Buffer2(devContext);//for colors
     my_dev::dev_mem<int>    intBuffer1(devContext);
 
     
     int genBufOffset = real4Buffer1.cmalloc_copy(tree.generalBuffer1, tree.n, 0);
+	genBufOffset = real4Buffer2.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset);//for colors
         genBufOffset = intBuffer1.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset);
 
     
@@ -187,33 +189,39 @@ void octree::sort_bodies(tree_structure &tree, bool doDomainUpdate) {
     dataReorderR4.set_arg<cl_mem>(4,   tree.bodies_ids.p()); 
     dataReorderR4.set_arg<cl_mem>(5,   intBuffer1.p()); 
     dataReorderR4.set_arg<cl_mem>(6,   tree.oriParticleOrder.p()); 
+    dataReorderR4.set_arg<cl_mem>(7,   tree.bodies_col.p());
+    dataReorderR4.set_arg<cl_mem>(8,   real4Buffer2.p());             
     dataReorderR4.execute(execStream->s());
     
-//    tree.bodies_Ppos.copy(real4Buffer1,  tree.n);
-//    tree.bodies_ids.copy (intBuffer1,    tree.n);
+   tree.bodies_Ppos.copy(real4Buffer1,  tree.n);
+   tree.bodies_ids.copy (intBuffer1,    tree.n);
     tree.bodies_Ppos.copy_devonly(real4Buffer1,  tree.n);
+    tree.bodies_col.copy_devonly (real4Buffer2,  tree.n);    
     tree.bodies_ids.copy_devonly (intBuffer1,    tree.n);
   }
   else
   {
     oneRunFull = 1;
+    
     //Call the reorder data functions
     //First generate some memory buffers
     //generalBuffer is always at least 3xfloat4*N
     my_dev::dev_mem<real4>  real4Buffer1(devContext);
     my_dev::dev_mem<real4>  real4Buffer2(devContext);
     my_dev::dev_mem<real4>  real4Buffer3(devContext);
+    my_dev::dev_mem<real4>  real4Buffer4(devContext);
     
     int genBufOffset1 = real4Buffer1.cmalloc_copy(tree.generalBuffer1, tree.n, 0);
         genBufOffset1 = real4Buffer2.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset1);    
-        genBufOffset1 = real4Buffer3.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset1);         
+        genBufOffset1 = real4Buffer3.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset1); 
+	genBufOffset1 = real4Buffer4.cmalloc_copy(tree.generalBuffer1, tree.n, genBufOffset1);    
     
 
     
     dataReorderCombined.set_arg<int>(0,      &tree.n);
     dataReorderCombined.set_arg<cl_mem>(1,   tree.bodies_key.p());  
     dataReorderCombined.setWork(tree.n, 512);   
-  //   dataReorderCombined.setWork(tree.n, 512, 240);  //256 threads and 120 blocks in total
+//     dataReorderCombined.setWork(tree.n, 512, 240);  //256 threads and 120 blocks in total
     
     
     //Position, velocity and acc0
@@ -223,10 +231,15 @@ void octree::sort_bodies(tree_structure &tree, bool doDomainUpdate) {
     dataReorderCombined.set_arg<cl_mem>(5,   real4Buffer2.p()); 
     dataReorderCombined.set_arg<cl_mem>(6,   tree.bodies_acc0.p()); 
     dataReorderCombined.set_arg<cl_mem>(7,   real4Buffer3.p()); 
-    dataReorderCombined.execute(execStream->s());
+    dataReorderCombined.set_arg<cl_mem>(8,   tree.bodies_col.p());
+    dataReorderCombined.set_arg<cl_mem>(9,   real4Buffer4.p()); 
+    
+    dataReorderCombined.execute(execStream->s());//  dataReorderCombined.set_arg<cl_mem>(7,   tree.bodies_col.p());
+ dataReorderCombined.set_arg<cl_mem>(8,   real4Buffer2.p());    
     tree.bodies_pos.copy(real4Buffer1,  tree.n);
     tree.bodies_vel.copy(real4Buffer2,  tree.n);
     tree.bodies_acc0.copy(real4Buffer3, tree.n);
+    tree.bodies_col.copy(real4Buffer4,  tree.n);
     
     //Acc1, Predicted position and velocity
     dataReorderCombined.set_arg<cl_mem>(2,   tree.bodies_acc1.p()); 
@@ -234,13 +247,15 @@ void octree::sort_bodies(tree_structure &tree, bool doDomainUpdate) {
     dataReorderCombined.set_arg<cl_mem>(4,   tree.bodies_Ppos.p());
     dataReorderCombined.set_arg<cl_mem>(5,   real4Buffer2.p()); 
     dataReorderCombined.set_arg<cl_mem>(6,   tree.bodies_Pvel.p()); 
-    dataReorderCombined.set_arg<cl_mem>(7,   real4Buffer3.p());   
+    dataReorderCombined.set_arg<cl_mem>(7,   real4Buffer3.p());  
+    dataReorderCombined.set_arg<cl_mem>(8,   tree.bodies_col.p());
+    dataReorderCombined.set_arg<cl_mem>(9,   real4Buffer4.p());     
     dataReorderCombined.execute(execStream->s());
 
     tree.bodies_acc1.copy(real4Buffer1, tree.n);
     tree.bodies_Ppos.copy(real4Buffer2,  tree.n);
     tree.bodies_Pvel.copy(real4Buffer3, tree.n);   
-
+    tree.bodies_col.copy(real4Buffer4,  tree.n);
 
     //These can reuse the real4Buffer1 space :-)
     my_dev::dev_mem<float2>  float2Buffer(devContext);
@@ -251,7 +266,6 @@ void octree::sort_bodies(tree_structure &tree, bool doDomainUpdate) {
     
     dataReorderF2.set_arg<int>(0,      &tree.n);
     dataReorderF2.set_arg<cl_mem>(1,   tree.bodies_key.p());  
-    
     dataReorderF2.set_arg<cl_mem>(2,   tree.bodies_time.p());
     dataReorderF2.set_arg<cl_mem>(3,   float2Buffer.p()); //Reuse as destination1
     dataReorderF2.set_arg<cl_mem>(4,   tree.bodies_ids.p()); 

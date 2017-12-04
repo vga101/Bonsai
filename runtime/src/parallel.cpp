@@ -2392,6 +2392,7 @@ int octree::gpu_exchange_particles_with_overflow_check_SFC(tree_structure &tree,
   tree.bodies_acc0.cresize(memSize,     false);
   tree.bodies_acc1.cresize(memSize,     false);
   tree.bodies_vel. cresize(memSize,     false);
+//   tree.bodies_col. cresize(memSize,     false);
   tree.bodies_time.cresize(memSize,     false);
   tree.bodies_ids. cresize(memSize + 1, false);
   tree.bodies_Ppos.cresize(memSize + 1, false);
@@ -6049,7 +6050,7 @@ void octree::mergeAndLaunchLETStructures(
 
 
 
-void octree::ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities,  int *bodiesIDs, int toSend)
+void octree::ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities, real4 *bodyColors,  int *bodiesIDs, int toSend)
 {
 #ifdef USE_MPI
   //First send the number of particles, then the actual sample data
@@ -6058,6 +6059,7 @@ void octree::ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities
   //Send the positions, velocities and ids
   MPI_Send( bodyPositions,  toSend*sizeof(real)*4, MPI_BYTE, destination, destination*2+1, MPI_COMM_WORLD);
   MPI_Send( bodyVelocities, toSend*sizeof(real)*4, MPI_BYTE, destination, destination*2+2, MPI_COMM_WORLD);
+  MPI_Send( bodyColors, toSend*sizeof(real)*4, MPI_BYTE, destination, destination*2+2, MPI_COMM_WORLD);
   MPI_Send( bodiesIDs,      toSend*sizeof(int),    MPI_BYTE, destination, destination*2+3, MPI_COMM_WORLD);
 
   /*    MPI_Send( (real*)&bodyPositions[0],  toSend*sizeof(real)*4, MPI_BYTE, destination, destination*2+1, MPI_COMM_WORLD);
@@ -6066,7 +6068,7 @@ void octree::ICSend(int destination, real4 *bodyPositions, real4 *bodyVelocities
 #endif
 }
 
-void octree::ICRecv(int recvFrom, vector<real4> &bodyPositions, vector<real4> &bodyVelocities,  vector<int> &bodiesIDs)
+void octree::ICRecv(int recvFrom, vector<real4> &bodyPositions, vector<real4> &bodyVelocities, vector<real4> &bodyColors,  vector<int> &bodiesIDs)
 {
 #ifdef USE_MPI
   MPI_Status status;
@@ -6078,11 +6080,13 @@ void octree::ICRecv(int recvFrom, vector<real4> &bodyPositions, vector<real4> &b
 
   bodyPositions.resize(nreceive);
   bodyVelocities.resize(nreceive);
+  bodyColors.resize(nreceive);
   bodiesIDs.resize(nreceive);
 
   //Recv the positions, velocities and ids
   MPI_Recv( (real*)&bodyPositions[0],  nreceive*sizeof(real)*4, MPI_BYTE, recvFrom, procId*2+1, MPI_COMM_WORLD,&status);
   MPI_Recv( (real*)&bodyVelocities[0], nreceive*sizeof(real)*4, MPI_BYTE, recvFrom, procId*2+2, MPI_COMM_WORLD,&status);
+  MPI_Recv( (real*)&bodyColors[0],     nreceive*sizeof(real)*4, MPI_BYTE, recvFrom, procId*2+2, MPI_COMM_WORLD,&status);
   MPI_Recv( (int *)&bodiesIDs[0],      nreceive*sizeof(int),    MPI_BYTE, recvFrom, procId*2+3, MPI_COMM_WORLD,&status);
 #endif
 }

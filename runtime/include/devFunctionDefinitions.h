@@ -24,8 +24,8 @@ extern "C" void  (gpu_boundaryReductionGroups)(const int n_groups, real4      *p
 extern "C" void  cl_build_key_list(uint4  *body_key, real4  *body_pos, int   n_bodies, real4  corner);
 extern "C" void  cl_build_valid_list(int n_bodies, int level, uint4  *body_key, uint *valid_list, const uint *workToDo);
 extern "C" void  cl_build_nodes(uint level, uint  *compact_list_len, uint  *level_offset, uint  *last_level, uint2 *level_list, uint  *compact_list, uint4 *bodies_key, uint4 *node_key, uint  *n_children, uint2 *node_bodies);
-extern "C" void  dataReorderCombined(const int N, uint4 *keyAndPerm, real4 *source1, real4* destination1, real4 *source2, real4* destination2,real4 *source3, real4* destination3);
-extern "C" void  dataReorderCombined4(const int N, uint4 *keyAndPerm, real4 *source1,  real4* destination1, int *source2, int* destination2, int *oldOrder);
+extern "C" void  dataReorderCombined(const int N, uint4 *keyAndPerm, real4 *source1, real4* destination1, real4 *source2, real4* destination2,real4 *source3, real4* destination3);//,real4 *source4, real4* destination4
+extern "C" void  dataReorderCombined4(const int N, uint4 *keyAndPerm, real4 *source1,  real4* destination1, int *source2, int* destination2, int *oldOrder, real4 *source3, real4* destination3);//
 extern "C" void  dataReorderF2(const int N, uint4 *keyAndPerm, float2 *source1, float2 *destination1, int *source2, int *destination2);
 
 extern "C" void  (sort_count)(volatile uint2 *valid, int *counts, const int N, setupParams sParam, int bitIdx);
@@ -35,10 +35,10 @@ extern "C" void  (reOrderKeysValues_kernel)(uint4 *keysSrc, uint4 *keysDest, uin
 
 extern "C" void  (gpu_extractKeyAndPerm)(uint4 *newKeys, uint4 *keys, uint *permutation, const int N);
 extern "C" void  (gpu_convertKey64to96)(uint4 *keys,  uint4 *newKeys, const int N);
-extern "C" void  (dataReorderCombined4)(const int N, uint4 *keyAndPerm, real4 *source1,  real4* destination1, int *source2,    int*   destination2, int *oldOrder);
+extern "C" void  (dataReorderCombined4)(const int N, uint4 *keyAndPerm, real4 *source1,  real4* destination1, int *source2,    int*   destination2, int *oldOrder, real4 *source3, real4* destination3);//
 extern "C" void  (gpu_dataReorderF2)(const int N, uint4 *keyAndPerm, float2 *source1, float2 *destination1, int    *source2, int *destination2);
 extern "C" void  (gpu_dataReorderI1)(const int n_particles, int *source, int *destination, uint  *permutation);
-extern "C" void  (gpu_dataReorderCombined)(const int N, uint4 *keyAndPerm, real4 *source1, real4* destination1, real4 *source2, real4* destination2, real4 *source3, real4* destination3);
+extern "C" void  (gpu_dataReorderCombined)(const int N, uint4 *keyAndPerm, real4 *source1, real4* destination1, real4 *source2, real4* destination2, real4 *source3, real4* destination3, real4 *source4, real4* destination4);//
 
     
 

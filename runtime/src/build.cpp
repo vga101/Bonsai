@@ -14,7 +14,7 @@ void octree::allocateParticleMemory(tree_structure &tree)
     n_bodies = (int)(n_bodies*MULTI_GPU_MEM_INCREASE);    //number of particles can fluctuate
 
   // Dirty hack to test adding an additional galaxy
-  //n_bodies *= 2;
+  n_bodies *= 2;
 
   //Particle properties
   tree.bodies_pos.cmalloc(n_bodies+1, true);   //+1 to set end pos, host mapped? TODO not needed right since we use Ppos
@@ -25,6 +25,7 @@ void octree::allocateParticleMemory(tree_structure &tree)
   tree.bodies_Pvel.cmalloc(n_bodies+1, true);   //Memory to store predicted velocities, host mapped
 
   tree.bodies_vel.cmalloc(n_bodies, false);
+  tree.bodies_col.cmalloc(n_bodies, false);     
   tree.bodies_acc0.ccalloc(n_bodies, false);    //ccalloc -> init to 0
   tree.bodies_acc1.ccalloc(n_bodies, false);    //ccalloc -> init to 0
   tree.bodies_time.ccalloc(n_bodies, false);    //ccalloc -> init to 0
@@ -155,6 +156,7 @@ void octree::reallocateParticleMemory(tree_structure &tree)
   tree.bodies_Pvel.cresize(n_bodies+1, reduce);   //Memory to store predicted velocities
 
   tree.bodies_vel.cresize (n_bodies, reduce);
+  tree.bodies_col.cresize (n_bodies, reduce);    //Memory to store colors  
   tree.bodies_acc0.cresize(n_bodies, reduce);    //ccalloc -> init to 0
   tree.bodies_acc1.cresize(n_bodies, reduce);    //ccalloc -> init to 0
   tree.bodies_time.cresize(n_bodies, reduce);    //ccalloc -> init to 0

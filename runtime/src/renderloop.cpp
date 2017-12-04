@@ -312,7 +312,7 @@ public:
     : m_tree(tree), m_idata(idata), iterationsRemaining(true),
       //m_renderer(tree->localTree.n + tree->localTree.n_dust),
       m_renderer(tree->localTree.n + tree->localTree.n_dust, MAX_PARTICLES),
-      //m_displayMode(ParticleRenderer::PARTICLE_SPRITES_COLOR),
+//       m_displayMode(ParticleRenderer::PARTICLE_SPRITES_COLOR),
 	  m_displayMode(SmokeRenderer::VOLUMETRIC),
       m_ox(0), m_oy(0), m_buttonState(0), m_inertia(0.2f),
       m_paused(false),
@@ -1179,25 +1179,78 @@ public:
   void initBodyColors()
   {
     int n = m_tree->localTree.n + m_tree->localTree.n_dust;   
+
     for(int i=0; i<n; i++) {
-      m_particleColors[i] = make_float4(1.0f, 1.0f, 1.0f, 1.0f);
+	m_particleColors[i] = make_float4(1.0f, 0.4f, 1.0f, 1.0f);
     }
+
+// //     real4 cc2 =  m_tree->localTree.bodies_col[60];
+// //     printf("colors: %f %f %f ", cc2.x, cc2.y, cc2.z);     
+//     
+// //     for(int i=0; i<n; i++) {
+// // //       m_particleColors[i] = make_float4(1.0f, 1.0f, 1.0f, 1.0f);
+// //       m_particleColors[i] = m_tree->localTree.bodies_col[i];
+// //       m_particleColors[i].w = 0.0;
+// //       printf("color: %d %f %f %f %f\n", i, m_particleColors[i].x, m_particleColors[i].y, m_particleColors[i].z, 1.0); 	
+// //     }
+//     m_renderer.setColors((float*)m_particleColors);
   }
 
   void getBodyData() {
 
    int n = m_tree->localTree.n + m_tree->localTree.n_dust;   
    //Above is safe since it is 0 if we dont use dust
+   
+   {//code below not needed anymore, can be used to print the color values (careful with the big files):
+   
+// //    //works
+// //    printf("number of particles %d\n",n);
+// //    for(int i=0; i<n; i++) {
+// //       real4 cc2 =  m_tree->localTree.bodies_col[i];
+// //       printf("colors: %d %f %f %f %f\n", i, cc2.x, cc2.y, cc2.z, cc2.w);   
+// //    }
+//    
+// //        //using the m_particleNewColors (now commented out)
+// //     printf("number of particles %d\n",m_tree->localTree.n);// or n
+// //     m_particleNewColors  = new float4[MAX_PARTICLES];  
+// //     for(int i=0; i<m_tree->localTree.n; i++) {
+// // 	m_particleNewColors[i] = m_tree->localTree.bodies_col[i];
+// // 	m_particleNewColors[i].w = 0.0;
+// // // 	printf("colors: %d %f %f %f %f\n", i, m_particleNewColors[i].x, m_particleNewColors[i].y, m_particleNewColors[i].z, 0.5);   //m_particleNewColors[i].w
+// //     }
+// //     m_renderer.setColors((float*)m_particleNewColors); 
+//   
+//   
+//       //using the m_particleColors
+//       printf("number of particles %d\n",m_tree->localTree.n);// or n
+//       for(int i=0; i<n; i++) {
+// // //     m_particleColors[i] = make_float4(1.0f, 0.2f, 1.0f, 1.0f);
+// // // 	  m_particleColors[i] = m_tree->localTree.bodies_col[i+63];
+// 	
+// // 	  m_particleColors[i] = m_tree->localTree.bodies_col[i];
+// // 	  m_particleColors[i].w = 0.0;
+// // 	  printf("color: %d %f %f %f %f\n", i, m_particleColors[i].x, m_particleColors[i].y, m_particleColors[i].z, 1.0); 	
+// 	
+// 	  printf("color: %d %f %f %f %f\n", i, (m_tree->localTree.bodies_col[i]).x, (m_tree->localTree.bodies_col[i]).y,(m_tree->localTree.bodies_col[i]).z, 1.0); 
+//       }
+// //    m_renderer.setColors((float*)m_particleColors); 
 
+   }
+      
+
+   
+      
     #ifdef USE_DUST
      //We move the dust data into the position data (on the device :) )
      m_tree->localTree.bodies_pos.copy_devonly(m_tree->localTree.dust_pos,
                            m_tree->localTree.n_dust, m_tree->localTree.n); 
      m_tree->localTree.bodies_ids.copy_devonly(m_tree->localTree.dust_ids,
                            m_tree->localTree.n_dust, m_tree->localTree.n);
+//      m_tree->localTree.bodies_col.copy_devonly(m_tree->localTree.dust_col,
+//                            m_tree->localTree.n_dust, m_tree->localTree.n);     
     #endif    
 
-	  float4 color2 = make_float4(starColor2.x*starColor2.w, starColor2.y*starColor2.w, starColor2.z*starColor2.w, 1.0f);
+    float4 color2 = make_float4(starColor2.x*starColor2.w, starColor2.y*starColor2.w, starColor2.z*starColor2.w, 1.0f);
     float4 color3 = make_float4(starColor3.x*starColor3.w, starColor3.y*starColor3.w, starColor3.z*starColor3.w, 1.0f);
     float4 color4 = make_float4(starColor4.x*starColor4.w, starColor4.y*starColor4.w, starColor4.z*starColor4.w, 1.0f);
 
@@ -1285,7 +1338,7 @@ public:
 		m_renderer.setColors((float*)colors);
 #else  /* eg: assign colours on the device */
 		const float Tcurrent = m_tree->get_t_current() * 9.78f;
-		assignColors( m_particleColorsDev, (int*)m_tree->localTree.bodies_ids.d(), n, 
+		assignColors( m_particleColorsDev,(int*)m_tree->localTree.bodies_ids.d(), (float4*)m_tree->localTree.bodies_col.d(), n, // 
 				color2, color3, color4, starColor, bulgeColor, darkMatterColor, dustColor, m_brightFreq, 
 				make_float4(
 					Tcurrent, TstartGlow,
@@ -1294,6 +1347,9 @@ public:
 				);
 
 		m_renderer.setColorsDevice( (float*)m_particleColorsDev );
+		
+// 		m_renderer.setColors((float*)m_particleNewColors);
+// 		m_renderer.setColors((float*)m_particleColors);
 #endif
 
     m_renderer.setNumParticles( m_tree->localTree.n + m_tree->localTree.n_dust);    
@@ -1301,6 +1357,7 @@ public:
     //m_tree->localTree.bodies_pos.d2h(); m_renderer.setPositions((float *) &m_tree->localTree.bodies_pos[0]);
     
     m_renderer.depthSort((float4*)m_tree->localTree.bodies_pos.d());
+//  m_renderer.depthSort((float4*)m_tree->localTree.bodies_col.d());
 
   }
 
@@ -1381,11 +1438,11 @@ public:
 
     bulgeColor = make_float4(1.0f, 1.0f, 0.5f, 2.0f);  // yellowish
 
-    //dustColor = make_float4(0.0f, 0.0f, 0.1f, 0.0f);      // blue
-    //dustColor =  make_float4(0.1f, 0.1f, 0.1f, 0.0f);    // grey
-    dustColor = make_float4(0.05f, 0.02f, 0.0f, 0.0f);  // brownish
+//     dustColor = make_float4(0.0f, 0.0f, 0.1f, 0.0f);      // blue
+//     dustColor =  make_float4(0.1f, 0.1f, 0.1f, 0.0f);    // grey
+//     dustColor = make_float4(0.05f, 0.02f, 0.0f, 0.0f);  // brownish
     //dustColor = make_float4(0.0f, 0.2f, 0.1f, 0.0f);  // green
-    //dustColor = make_float4(0.0f, 0.0f, 0.0f, 0.0f);  // black
+    dustColor = make_float4(0.0f, 0.0f, 0.0f, 0.0f);  // black
 
     darkMatterColor = make_float4(1.0f, 1.0f, 0.0f, 5.0f);      // blue
 
@@ -1421,7 +1478,8 @@ public:
 
   float4 *m_particleColors;
   float4 *m_particleColorsDev;
-
+//float4 *m_particleNewColors;
+  
   // view params
   int m_ox; // = 0
   int m_oy; // = 0;

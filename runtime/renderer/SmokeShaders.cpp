@@ -66,6 +66,14 @@ void main()                                                 \n
 
     //gl_PointSize = pointRadius*(pointScale / dist);       \n
 	gl_PointSize = max(1.0, pointRadius * (pointScale / dist)); \n
+	
+// 	//varying particle size
+// // 	if(gl_Color.b>0.4) gl_PointSize = 5.2; \n
+// 	if(gl_Color.b>0.6 && gl_Color.r<0.2) gl_PointSize = max(2.0, pointRadius*1.3 * (pointScale*1.5 / dist)); \n
+// 	if(gl_Color.r>0.5 && gl_Color.b<0.5) gl_PointSize = max(2.0, pointRadius*1.4 * (pointScale*1.6 / dist)); \n
+// // 	if(gl_Color.r>0.5 && gl_Color.b<0.5) gl_PointSize = max(3.0, pointRadius*2.4 * (pointScale*1.6 / dist)); \n
+	  
+	  
     //float pointSize = pointRadius * (pointScale / dist);
     //if (pointSize < 1.0) col.rgb *= pointSize;
     //gl_PointSize = max(1.0, pointSize);
@@ -436,7 +444,7 @@ void main()                                                                     
     c += texture2D(tex, uv + vec2(0.5, -0.5)*texelSize*blurRadius);    \n
     c += texture2D(tex, uv + vec2(0.5, 0.5)*texelSize*blurRadius);     \n
     c += texture2D(tex, uv + vec2(-0.5, 0.5)*texelSize*blurRadius);    \n
-    c *= 0.25;                                                                        \n
+    c *= 0.025;                                                                        \n
 
     gl_FragColor = c;                                                                 \n
 }                                                                                     \n

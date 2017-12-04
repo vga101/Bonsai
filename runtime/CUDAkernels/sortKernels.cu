@@ -175,7 +175,10 @@ PROF_MODULE(sortKernels);
 KERNEL_DECLARE(gpu_dataReorderR4)(const int n_particles,
                                          real4 *source,
                                          real4 *destination,
-                                         uint  *permutation) {
+                                         uint  *permutation
+//                                          ,real4 *source2,	//color
+//                                          real4 *destination2	//color							 
+ 				) {
   const int bid =  blockIdx.y *  gridDim.x +  blockIdx.x;
   const int tid = threadIdx.y * blockDim.x + threadIdx.x;
   const int dim =  blockDim.x * blockDim.y;
@@ -185,6 +188,7 @@ KERNEL_DECLARE(gpu_dataReorderR4)(const int n_particles,
 
    int newIndex = permutation[idx];
    destination[idx] = source[newIndex];  
+//    destination2[idx] = source2[newIndex];  //colors
 }
 
 // KERNEL_DECLARE(dataReorderF2)(const int n_particles,
@@ -252,7 +256,9 @@ KERNEL_DECLARE(gpu_extractKeyAndPerm)(uint4 *newKeys, uint4 *keys, uint *permuta
 KERNEL_DECLARE(gpu_dataReorderCombined)(const int N, uint4 *keyAndPerm,
                                       real4 *source1, real4* destination1,
                                       real4 *source2, real4* destination2,
-                                      real4 *source3, real4* destination3) {
+                                      real4 *source3, real4* destination3
+				      ,real4 *source4, real4* destination4
+ 				      ) {
   const int bid =  blockIdx.y *  gridDim.x +  blockIdx.x;
   const int tid = threadIdx.y * blockDim.x + threadIdx.x;
   const int dim =  blockDim.x * blockDim.y;
@@ -264,6 +270,7 @@ KERNEL_DECLARE(gpu_dataReorderCombined)(const int N, uint4 *keyAndPerm,
   destination1[idx] = source1[newIndex];
   destination2[idx] = source2[newIndex];  
   destination3[idx] = source3[newIndex];  
+  destination4[idx] = source4[newIndex];  
 //   destination1[idx] = source1[newIndex];  
 //   destination1[idx] = source1[newIndex];    
 }
@@ -273,7 +280,9 @@ KERNEL_DECLARE(dataReorderCombined4)(const int N,
                                       uint4 *keyAndPerm,
                                       real4 *source1,  real4* destination1,
                                       int *source2,    int*   destination2,
-                                      int *oldOrder) {
+                                      int *oldOrder 
+                                      ,real4 *source3,  real4* destination3//color	
+				    ) {
   const int bid =  blockIdx.y *  gridDim.x +  blockIdx.x;
   const int tid = threadIdx.y * blockDim.x + threadIdx.x;
   const int dim =  blockDim.x * blockDim.y;
@@ -284,6 +293,7 @@ KERNEL_DECLARE(dataReorderCombined4)(const int N,
   int newIndex      = keyAndPerm[idx].w;
   destination1[idx] = source1[newIndex];
   destination2[idx] = source2[newIndex];  
+  destination3[idx] = source3[newIndex];  //color	
   oldOrder[idx]     = newIndex;
 }
 
