@@ -43,7 +43,8 @@ void read_tipsy_file_parallel(std::vector<real4> &bodyPositions, std::vector<rea
   if(!inputFile.is_open())
   {
     LOG("Can't open input file \n");
-    exit(0);
+    std::cerr << "Error: Can't open input file " << fullFileName << "!" << std::endl;
+    exit(1);
   }
 
   dump  h;

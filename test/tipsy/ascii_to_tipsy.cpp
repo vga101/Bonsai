@@ -7,6 +7,12 @@
 #include <vector>
 #include "tipsy.h"
 
+// code version from git
+//#include "version.h"
+#ifndef GIT_VERSION
+#define GIT_VERSION "n/a"
+#endif
+
 const int INDEX_D_START = 200000000;
 const int INDEX_S_START = 100000000;
 
@@ -70,10 +76,13 @@ int main(int argc, char* argv[])
     std::vector<dark_particle> vd{};
     std::vector<star_particle> vs{};
 
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] 
-                  << " infile.ascii outfile.tipsy [--reducebodies #]" << std::endl;
+    if (argc < 3) {
+        std::cerr << "Usage: " << argv[0]
+                  << " infile.ascii outfile.tipsy [--reducebodies INTEGER] [-v]" << std::endl
+                  << "[source version: " << GIT_VERSION << "]" << std::endl;
         return 1;
+    } else {
+        std::cout << "*** ascii_to_tipsy ***" << std::endl;
     }
 
     std::cout << "Infile: " << argv[1] << std::endl;
@@ -82,16 +91,29 @@ int main(int argc, char* argv[])
     std::string inname(argv[1]);
     std::string outname(argv[2]);
     int reduce_bodies_factor = 1;
+    int verbosity = 0;
 
-    // reducebodies: keep only every n-th particle
-    if (argc == 5 && strcmp(argv[3], "--reducebodies") == 0) {
-        reduce_bodies_factor = atoi(argv[4]);
-        if (reduce_bodies_factor == 0) {
-            std::cout << "Invalid value for reducebodies option" << std::endl;
-            return 1;
+    // dumb option processing
+    for (int i = 3; i < argc; i++) {
+        //std::cout << "argv " << i << " = " << argv[i] << std::endl;
+
+        // --reducebodies NUM
+        if (strcmp(argv[i], "--reducebodies") == 0 && (i + 1) < argc) {
+            reduce_bodies_factor = atoi(argv[i+1]);
+            if (reduce_bodies_factor == 0) {
+                std::cout << "Invalid value for reducebodies option" << std::endl;
+                return 1;
+            }
+        }
+
+        // -v
+        if (strcmp(argv[i], "-v") == 0) {
+            verbosity += 1;
         }
     }
+
     std::cout << "reduce_bodies_factor: " << reduce_bodies_factor << std::endl;
+    std::cout << "verbosity: " << verbosity << std::endl;
 
     std::ifstream infile(inname);
     std::string line;
@@ -128,6 +150,7 @@ int main(int argc, char* argv[])
             // parse data line
 
             // reduce particle number
+            // random picking should be safer though...
             if (particles_read % reduce_bodies_factor != 0) {
                 particles_read += 1;
                 continue;
@@ -144,6 +167,9 @@ int main(int argc, char* argv[])
             // ASCII file:
             // pos[xyz] in kpc, vel[xyz] in km/s, mass in Msun, l[bgr] in erg/s, m_ini in Msun, age in Gyr
 
+            // compensate for reduced number of particles
+            mass *= reduce_bodies_factor;
+
             if (flag == 1) {
                 // dark matter
 
@@ -153,7 +179,9 @@ int main(int argc, char* argv[])
                                 0.0f,
                                 id_d);
                 m_d += mass/MSUN;
-                std::cout << "dm particle id=" << id_d << ": mass=" << mass << std::endl;
+                if (verbosity > 0) {
+                    std::cout << "dm particle id=" << id_d << ": mass=" << mass << std::endl;
+                }
                 vd.push_back(d);  // add to end of vector
 
                 id_d += 1;
@@ -172,7 +200,9 @@ int main(int argc, char* argv[])
                 //rgba[2] = (id_s+2)%3==0 ? 1. : 0.;
 
                 if (age < 2.) {
-                    std::cout << "---- age " << age << std::endl;
+                    if (verbosity > 1) {
+                        std::cout << "# young age = " << age << std::endl;
+                    }
                     rgba[0] = 0.;
                     rgba[1] = 0.;
                     rgba[2] = 1.;
@@ -184,7 +214,9 @@ int main(int argc, char* argv[])
                     rgba[1] = 0.;
                     rgba[2] = 0.;
                     rgba[3] = 1.;
-                    std::cout << "--- black---" << std::endl;
+                    if (verbosity > 1) {
+                        std::cout << " color = black" << std::endl;
+                    }
                 }
                 star_particle s(mass/MSUN,
                                 posx/KPC, posy/KPC, posz/KPC,
@@ -194,27 +226,34 @@ int main(int argc, char* argv[])
                                 rgba[0], rgba[1], rgba[2], rgba[3]
                                );
                 m_s += mass/MSUN;
-                std::cout << "star particle id=" << id_s << ": mass=" << mass << " rgb=" << rgba[0] << "," << rgba[1] << "," << rgba[2] << std::endl;
+                if (verbosity > 0) {
+                    std::cout << "star particle id=" << id_s << ": mass=" << mass
+                            << " rgb=" << rgba[0] << "," << rgba[1] << "," << rgba[2] << std::endl;
+                }
                 vs.push_back(s);  // add to end of vector
 
                 id_s += 1;
                 particles_read += 1;
 
                 if (id_s >= INDEX_D_START) {
-                    std::cout << "Error: too many star particles. Overlapping indices." << std::endl;
+                    std::cerr << "Error: too many star particles. Overlapping indices." << std::endl;
                     return 1;
                 }
 
             } else {
                 // not defined
-                std::cout << "Error: flag " << flag << " is not defined." << std::endl;
+                std::cerr << "Error: flag " << flag << " is not defined." << std::endl;
                 return 1;
             }
         }
     }
-    std::cout << "Added " << (id_d-INDEX_D_START) << " dark matter particles, total mass: " << m_d << std::endl;
-    std::cout << "Added " << (id_s-INDEX_S_START) << " star particles, total mass: " << m_s << std::endl;
-    std::cout << "Total mass (dm + stars): " << m_d + m_s << std::endl;
+
+    int n_d = id_d - INDEX_D_START;
+    int n_s = id_s - INDEX_S_START;
+    std::cout << "Added " << n_d << " dark matter particles, total mass: " << m_d << std::endl;
+    std::cout << "Added " << n_s << " star particles, total mass: " << m_s << std::endl;
+    std::cout << "-> Total number of particles (dm + stars): " << n_d + n_s << std::endl;
+    std::cout << "-> Total mass (dm + stars): " << m_d + m_s << std::endl;
 
 
 //    std::vector<dark_particle> vd{{0.00443292, -0.0120859, -0.0410267, -0.00437124, -1.605, -0.643298, -0.367065, 0.206867, 200000000},

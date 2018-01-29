@@ -76,7 +76,9 @@ WOGManager::~WOGManager()
 
 void WOGManager::read_galaxies(std::string const& path)
 {
-  for (int i = 0;; ++i)
+  int i = 0;
+  std::cout << "WOG: reading available galaxies from '" << path << "'" << std::endl;
+  for (i = 0;; ++i)
   {
   	std::string filename = path + "/galaxy_type_" + std::to_string(i) + ".tipsy";
   	if (access(filename.c_str(), F_OK) == -1) break;
@@ -107,6 +109,12 @@ void WOGManager::read_galaxies(std::string const& path)
   	std::cout << "  Total_velocity = " << tv.x << " " << tv.y << " " << tv.z << std::endl;
 
   	galaxies.push_back(galaxy);
+  }
+  if (i == 0) {
+      std::cerr << "Error: no galaxies available for WOG!" << std::endl;
+      exit(1);
+  } else {
+    std::cout << "WOG: " << i << " galaxies available and have been read." << std::endl;
   }
 }
 
