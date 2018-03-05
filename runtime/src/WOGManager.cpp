@@ -286,7 +286,7 @@ json WOGManager::execute_json(std::string const& json_request_string)
     tree->releaseGalaxy(galaxy);
 	user_particles[user_id] += galaxy.pos.size();
 
-	std::cout << "Galaxy with " + std::to_string(galaxy.pos.size()) + " particles of user " + std::to_string(user_id) + " was released.";
+	std::cout << "Galaxy with " + std::to_string(galaxy.pos.size()) + " particles of user " + std::to_string(user_id) + " was released." << std::endl;
 	json_response["response"] = task;
   }
   else if (task == "remove")
@@ -301,12 +301,12 @@ json WOGManager::execute_json(std::string const& json_request_string)
     tree->removeGalaxy(user_id);
     user_particles[user_id] = 0;
 
-	std::cout << "All particles of user " + std::to_string(user_id) + " were removed.";
+	std::cout << "All particles of user " + std::to_string(user_id) + " were removed." << std::endl;
 	json_response["response"] = task;
   }
   else if (task == "report")
   {
-	std::cout << "Reporting current status.";
+	std::cout << "Reporting current status." << std::endl;
 	json_response["response"] = task;
   }
   else
@@ -321,7 +321,7 @@ json WOGManager::execute_json(std::string const& json_request_string)
   for (int ind = 0; ind < number_of_users; ind++) 
     up[ind] = user_particles[ind];
   json_response["user_particles"] = up;
-  std::cout << "user_particles: " << up;
+  std::cout << "user_particles: " << up << std::endl;
 
   return json_response;
 }

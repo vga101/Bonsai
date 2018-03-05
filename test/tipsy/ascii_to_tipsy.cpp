@@ -38,7 +38,7 @@ void lum_to_rgb(float rgba[4], float lr, float lg, float lb) {
     // though physically not correct to sum this up...
 
     // rescale (from looking at color distribition)
-    lr *= 1.;
+    lr *= 1.8;
     lg *= 20.;
     lb *= 30.;
     float lmax = std::max(lr, std::max(lb, lg));
