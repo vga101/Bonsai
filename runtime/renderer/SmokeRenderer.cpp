@@ -112,27 +112,98 @@ SmokeRenderer::SmokeRenderer(int numParticles, int maxParticles) :
 //     m_cullDarkMatter(true)
 
 
+//     mMaxParticles(maxParticles),
+//     mNumParticles(numParticles),
+//     mPosVbo(0),
+//     mVelVbo(0),
+//     mColorVbo(0),
+//     mIndexBuffer(0),
+//     mParticleRadius(0.144f),//0.7f
+// 	mDisplayMode(SPRITES),//POINTS, SPRITES, VOLUMETRIC, NUM_MODES
+//     mWindowW(800),
+//     mWindowH(600),
+//     mFov(40.0f),
+//     m_downSample(1),
+//     m_blurDownSample(2),
+//     m_numSlices(94),
+// 	m_numDisplayedSlices(m_numSlices),
+//     m_sliceNo(0),
+//     m_shadowAlpha(0.268f),//0.644f
+//     m_spriteAlpha(0.868f),//
+//     m_volumeAlpha(0.2f),
+// 	m_dustAlpha(1.0f),
+//     m_volumeColor(0.5f, 0.0f, 0.0f),
+//     m_doBlur(true),
+// 	m_blurRadius(1.0f),
+//     m_blurPasses(2),
+//     m_displayLightBuffer(false),
+//     m_lightPos(5.0f, 5.0f, -5.0f),
+// 	m_lightTarget(0.0f, 0.5f, 0.0f),
+// 	m_lightColor(0.0f, 0.0f, 0.0f),
+// 	m_colorOpacity(0.1f, 0.2f, 0.3f),
+//     //m_lightBufferSize(256),
+// 	m_lightBufferSize(512),
+//     m_srcLightTexture(0),
+//     m_lightDepthTexture(0),
+//     m_fbo(0),
+//     m_depthTex(0),
+//     m_rampTex(0),
+//     m_overBright(42.0f),
+//     m_overBrightThreshold(0.305f),
+//     m_imageBrightness(0.5f),
+//     m_invertedView(true),
+// 	m_minDepth(0.0f),
+// 	m_maxDepth(1.0f),
+// 	m_enableAA(false),
+// 	m_starBlurRadius(40.0f),
+// 	m_starThreshold(1.0f),
+//     m_starPower(72.0f),
+// 	m_starIntensity(0.001f),//0.003
+// 	m_glowRadius(6.4f),//40
+//     m_glowIntensity(0.5f),
+// 	m_ageScale(20.0f),
+// 	m_enableVolume(false),
+// 	m_enableFilters(true),
+//     m_noiseFreq(0.05f),
+//     m_noiseAmp(1.0f),
+//     m_indirectAmount(0.5f),
+//     m_volumeIndirect(10.5f),
+// 	m_volumeStart(0.5f),
+// 	m_volumeWidth(0.1f),
+// // 	m_gamma(1.0f / 2.2f),
+// 	m_gamma(0.5f ),
+// 	m_fog(0.001f),
+//     m_cubemapTex(0),
+//     m_flareThreshold(5.5f),
+//     m_flareIntensity(0.164f),
+//     m_sourceIntensity(10.5f),
+//     m_flareRadius(3.2f),
+//     m_skyboxBrightness(0.5f),
+//     m_transmission(0.176f),
+//     m_cullDarkMatter(true)
+    
+    
     mMaxParticles(maxParticles),
     mNumParticles(numParticles),
     mPosVbo(0),
     mVelVbo(0),
     mColorVbo(0),
     mIndexBuffer(0),
-    mParticleRadius(0.144f),//0.7f
-	mDisplayMode(SPRITES),//POINTS, SPRITES, VOLUMETRIC, NUM_MODES
+    mParticleRadius(0.1952f),//0.7f
+	mDisplayMode(POINTS),//POINTS, SPRITES, VOLUMETRIC, NUM_MODES //not functional here! check renderloop.cpp line ~317
     mWindowW(800),
     mWindowH(600),
     mFov(40.0f),
     m_downSample(1),
     m_blurDownSample(2),
-    m_numSlices(94),
+    m_numSlices(20),
 	m_numDisplayedSlices(m_numSlices),
     m_sliceNo(0),
-    m_shadowAlpha(0.268f),//0.644f
+    m_shadowAlpha(0.984f),//0.644f
     m_spriteAlpha(0.868f),//
     m_volumeAlpha(0.2f),
 	m_dustAlpha(1.0f),
-    m_volumeColor(0.5f, 0.0f, 0.0f),
+    m_volumeColor(0.436f, 0.776f, 0.880f),
     m_doBlur(true),
 	m_blurRadius(1.0f),
     m_blurPasses(2),
@@ -150,15 +221,15 @@ SmokeRenderer::SmokeRenderer(int numParticles, int maxParticles) :
     m_rampTex(0),
     m_overBright(42.0f),
     m_overBrightThreshold(0.305f),
-    m_imageBrightness(0.5f),
+    m_imageBrightness(1.56f),
     m_invertedView(true),
 	m_minDepth(0.0f),
 	m_maxDepth(1.0f),
 	m_enableAA(false),
 	m_starBlurRadius(40.0f),
 	m_starThreshold(1.0f),
-    m_starPower(72.0f),
-	m_starIntensity(0.001f),//0.003
+    m_starPower(91.6f),
+	m_starIntensity(0.976f),//0.003
 	m_glowRadius(6.4f),//40
     m_glowIntensity(0.5f),
 	m_ageScale(20.0f),
@@ -177,10 +248,11 @@ SmokeRenderer::SmokeRenderer(int numParticles, int maxParticles) :
     m_flareThreshold(5.5f),
     m_flareIntensity(0.164f),
     m_sourceIntensity(10.5f),
-    m_flareRadius(3.2f),
+    m_flareRadius(2.8f),
     m_skyboxBrightness(0.5f),
     m_transmission(0.176f),
-    m_cullDarkMatter(true)
+    m_cullDarkMatter(true)    
+    
 
 {
 	// load shader programs
@@ -1227,34 +1299,34 @@ void SmokeRenderer::renderSprites(bool sort)
 void SmokeRenderer::render()
 {
 	switch(mDisplayMode) {
-	case POINTS:
-		glPointSize(2.0f);
-		glEnable(GL_DEPTH_TEST);
-		glColor4f(1.0, 1.0, 1.0, 1.0f);
-		m_simpleProg->enable();
-		drawPoints(0, mNumParticles, false);
-		m_simpleProg->disable();
-        glPointSize(1.0f);
-		break;
+		case POINTS:
+			glPointSize(2.0f);
+			glEnable(GL_DEPTH_TEST);
+			glColor4f(1.0, 1.0, 1.0, 1.0f);
+			m_simpleProg->enable();
+			drawPoints(0, mNumParticles, false);
+			m_simpleProg->disable();
+			glPointSize(1.0f);
+			break;
 
-	case SPRITES:
-		renderSprites(false);
-		break;
+		case SPRITES:
+			renderSprites(false);
+			break;
 
-    case SPRITES_SORTED:
-        renderSprites(true);
-        break;
+		case SPRITES_SORTED:
+			renderSprites(true);
+			break;
 
-	case VOLUMETRIC:
-		calcVectors();
-		depthSortCopy();
-		drawSlices();
-		compositeResult();
-		//drawBounds();
-		break;
+		case VOLUMETRIC:
+			calcVectors();
+			depthSortCopy();
+			drawSlices();
+			compositeResult();
+			//drawBounds();
+			break;
 
-	case NUM_MODES:
-		break;
+		case NUM_MODES:
+			break;
 	}
 
     if (m_displayLightBuffer) {

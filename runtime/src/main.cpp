@@ -1072,9 +1072,9 @@ int main(int argc, char** argv)
       for (auto &p : bodyPositions)
       {
         p.x -= center_of_mass.x;
-	p.y -= center_of_mass.y;//see the dummy particles
-// 	p.z -= center_of_mass.z + 10000;//hide the dummy particles
-	p.z -= center_of_mass.z;
+	p.y -= center_of_mass.y;
+	p.z -= center_of_mass.z + 10000;//hide the dummy particles
+// 	p.z -= center_of_mass.z;//see the dummy particles
       }
 
       // steady

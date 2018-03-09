@@ -313,7 +313,8 @@ public:
       //m_renderer(tree->localTree.n + tree->localTree.n_dust),
       m_renderer(tree->localTree.n + tree->localTree.n_dust, MAX_PARTICLES),
 //       m_displayMode(ParticleRenderer::PARTICLE_SPRITES_COLOR),
-	  m_displayMode(SmokeRenderer::VOLUMETRIC),
+// 	  m_displayMode(SmokeRenderer::VOLUMETRIC),
+	m_displayMode(SmokeRenderer::SPRITES),//POINTS, SPRITES, VOLUMETRIC, NUM_MODES
       m_ox(0), m_oy(0), m_buttonState(0), m_inertia(0.2f),
       m_paused(false),
       m_renderingEnabled(true),
@@ -1251,9 +1252,12 @@ public:
     #endif    
 
     float4 color2 = make_float4(starColor2.x*starColor2.w, starColor2.y*starColor2.w, starColor2.z*starColor2.w, 1.0f);
-    float4 color3 = make_float4(starColor3.x*starColor3.w, starColor3.y*starColor3.w, starColor3.z*starColor3.w, 1.0f);
+//     float4 color3 = make_float4(starColor3.x*starColor3.w, starColor3.y*starColor3.w, starColor3.z*starColor3.w, 1.0f);
+//     float4 color3 = starColor;
+    float4 color3 = make_float4(starColor.x, starColor.y, starColor.z, starColor.w*30.0);
     float4 color4 = make_float4(starColor4.x*starColor4.w, starColor4.y*starColor4.w, starColor4.z*starColor4.w, 1.0f);
 
+    
 #if 0  /*eg:  assign colours on the host*/
 
 #if 0
