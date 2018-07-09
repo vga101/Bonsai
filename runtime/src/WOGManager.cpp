@@ -10,7 +10,8 @@
 
 using jsoncons::json;
 
-#define DEBUG_PRINT
+// uncomment for more verbosity
+// #define DEBUG_PRINT
 
 WOGManager::WOGManager(octree *tree, std::string const& path, int port, int window_width, int window_height, real fovy,
   real farZ, real camera_distance, real deletion_radius_factor, int reduce_bodies_factor)
@@ -187,10 +188,9 @@ void WOGManager::reshape(int width, int height)
   rear_corner.z = farZ - camera_distance;
   deletion_radius_square = rear_corner.x * rear_corner.x + rear_corner.y * rear_corner.y + rear_corner.z * rear_corner.z;
   deletion_radius_square *= deletion_radius_factor * deletion_radius_factor;
-  #ifdef DEBUG_PRINT
-    std::cout << "deletion_radius_factor = " << deletion_radius_factor << std::endl;
-    std::cout << "deletion_radius = " << std::sqrt(deletion_radius_square) << std::endl;
-  #endif
+  std::cout << "deletion_radius_factor = " << deletion_radius_factor << std::endl;
+  std::cout << "deletion_radius = " << std::sqrt(deletion_radius_square) << std::endl;
+
 }
 
 void WOGManager::remove_particles()
@@ -267,12 +267,10 @@ json WOGManager::execute_json(std::string const& json_request_string)
     
 
 
-    #ifdef DEBUG_PRINT
-      std::cout << "user_id: " << user_id << std::endl;
-      std::cout << "galaxy_id: " << galaxy_id << std::endl;
-      std::cout << "position: " << position.x << " " << position.y << " " << position.z << std::endl;
-      std::cout << "velocity: " << velocity.x << " " << velocity.y << " " << velocity.z << std::endl;
-    #endif
+    std::cout << "user_id: " << user_id << "   ";
+    std::cout << "galaxy_id: " << galaxy_id << "   ";
+    std::cout << "position: " << position.x << " " << position.y << " " << position.z << "   ";
+    std::cout << "velocity: " << velocity.x << " " << velocity.y << " " << velocity.z << std::endl;
 
 	Galaxy galaxy = galaxies[galaxy_id];
 	galaxy.translate(position);
@@ -282,7 +280,9 @@ json WOGManager::execute_json(std::string const& json_request_string)
     for (auto & id : galaxy.ids) id = id - id % 10 + user_id; 
 //  for (auto & id : galaxy.ids) id = id; //unique id's, but player determination messed up (also in main.cpp for the dummy file)    
 
+    #ifdef DEBUG_PRINT
     std::cout << "DEBUG " << galaxy.vel.size() << "   " << galaxy.col.size() <<std::endl;
+    #endif
     tree->releaseGalaxy(galaxy);
 	user_particles[user_id] += galaxy.pos.size();
 
@@ -306,7 +306,9 @@ json WOGManager::execute_json(std::string const& json_request_string)
   }
   else if (task == "report")
   {
+	#ifdef DEBUG_PRINT
 	std::cout << "Reporting current status." << std::endl;
+	#endif
 	json_response["response"] = task;
   }
   else
@@ -321,7 +323,9 @@ json WOGManager::execute_json(std::string const& json_request_string)
   for (int ind = 0; ind < number_of_users; ind++) 
     up[ind] = user_particles[ind];
   json_response["user_particles"] = up;
+  #ifdef DEBUG_PRINT
   std::cout << "user_particles: " << up << std::endl;
+  #endif
 
   return json_response;
 }
