@@ -1185,16 +1185,6 @@ public:
 	m_particleColors[i] = make_float4(1.0f, 0.4f, 1.0f, 1.0f);
     }
 
-// //     real4 cc2 =  m_tree->localTree.bodies_col[60];
-// //     printf("colors: %f %f %f ", cc2.x, cc2.y, cc2.z);     
-//     
-// //     for(int i=0; i<n; i++) {
-// // //       m_particleColors[i] = make_float4(1.0f, 1.0f, 1.0f, 1.0f);
-// //       m_particleColors[i] = m_tree->localTree.bodies_col[i];
-// //       m_particleColors[i].w = 0.0;
-// //       printf("color: %d %f %f %f %f\n", i, m_particleColors[i].x, m_particleColors[i].y, m_particleColors[i].z, 1.0); 	
-// //     }
-//     m_renderer.setColors((float*)m_particleColors);
   }
 
   void getBodyData() {
@@ -1202,45 +1192,6 @@ public:
    int n = m_tree->localTree.n + m_tree->localTree.n_dust;   
    //Above is safe since it is 0 if we dont use dust
    
-   {//code below not needed anymore, can be used to print the color values (careful with the big files):
-   
-// //    //works
-// //    printf("number of particles %d\n",n);
-// //    for(int i=0; i<n; i++) {
-// //       real4 cc2 =  m_tree->localTree.bodies_col[i];
-// //       printf("colors: %d %f %f %f %f\n", i, cc2.x, cc2.y, cc2.z, cc2.w);   
-// //    }
-//    
-// //        //using the m_particleNewColors (now commented out)
-// //     printf("number of particles %d\n",m_tree->localTree.n);// or n
-// //     m_particleNewColors  = new float4[MAX_PARTICLES];  
-// //     for(int i=0; i<m_tree->localTree.n; i++) {
-// // 	m_particleNewColors[i] = m_tree->localTree.bodies_col[i];
-// // 	m_particleNewColors[i].w = 0.0;
-// // // 	printf("colors: %d %f %f %f %f\n", i, m_particleNewColors[i].x, m_particleNewColors[i].y, m_particleNewColors[i].z, 0.5);   //m_particleNewColors[i].w
-// //     }
-// //     m_renderer.setColors((float*)m_particleNewColors); 
-//   
-//   
-//       //using the m_particleColors
-//       printf("number of particles %d\n",m_tree->localTree.n);// or n
-//       for(int i=0; i<n; i++) {
-// // //     m_particleColors[i] = make_float4(1.0f, 0.2f, 1.0f, 1.0f);
-// // // 	  m_particleColors[i] = m_tree->localTree.bodies_col[i+63];
-// 	
-// // 	  m_particleColors[i] = m_tree->localTree.bodies_col[i];
-// // 	  m_particleColors[i].w = 0.0;
-// // 	  printf("color: %d %f %f %f %f\n", i, m_particleColors[i].x, m_particleColors[i].y, m_particleColors[i].z, 1.0); 	
-// 	
-// 	  printf("color: %d %f %f %f %f\n", i, (m_tree->localTree.bodies_col[i]).x, (m_tree->localTree.bodies_col[i]).y,(m_tree->localTree.bodies_col[i]).z, 1.0); 
-//       }
-// //    m_renderer.setColors((float*)m_particleColors); 
-
-   }
-      
-
-   
-      
     #ifdef USE_DUST
      //We move the dust data into the position data (on the device :) )
      m_tree->localTree.bodies_pos.copy_devonly(m_tree->localTree.dust_pos,
